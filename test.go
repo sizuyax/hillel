@@ -96,9 +96,9 @@ func (r *Race) Start() (map[string]int, []string) {
 	return mapa, names
 }
 
-func (r *Race) CreateTeam(carapaceSize, length, teethSize, paws, fin, runSpeedTurtle, runSpeedTiger, runSpeedFish int, color string) *Race {
+func (r *Race) CreateTeam(carapaceSize, length, teethSize, paws, fin, runSpeedTurtle, runSpeedTiger, runSpeedFish, distance int, color string) *Race {
 	team := &Race{
-		Distance: 1000,
+		Distance: distance,
 		Turtle: Turtle{
 			animal: Animal{
 				runSpeed: runSpeedTurtle,
@@ -135,16 +135,17 @@ func main() {
 	var runSpeedTurtle int
 	var runSpeedTiger int
 	var runSpeedFish int
+	var distance int
 
 	flag.IntVar(&runSpeedTurtle, "runSpeedTurtle", 10, "Run speed of the turtle")
 	flag.IntVar(&runSpeedTiger, "runSpeedTiger", 100, "Run speed of the tiger")
 	flag.IntVar(&runSpeedFish, "runSpeedFish", 50, "Run speed of the fish")
+	flag.IntVar(&distance, "Distance", 1000, "Distance")
 
 	flag.Parse()
 
 	team := &Race{}
-	team = team.CreateTeam(10, 20, 8, 4, 2, runSpeedTurtle, runSpeedTiger, runSpeedFish, "red")
-
+	team = team.CreateTeam(10, 20, 8, 4, 2, runSpeedTurtle, runSpeedTiger, runSpeedFish, distance, "red")
 	mapa, names := team.Start()
 
 	for _, name := range names {
