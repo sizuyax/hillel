@@ -29,6 +29,7 @@ type Fish struct {
 	color  string
 }
 
+// Race AnimalCry - нужно для того чтобы выводить крик победителя и проигравшего
 type Race struct {
 	Distance        int
 	Turtle          Turtle
@@ -37,22 +38,31 @@ type Race struct {
 	TurtleRemaining int
 	TigerRemaining  int
 	FishRemaining   int
-	Animal          Animal
+	AnimalCry       Animal
 }
 
-func (a *Animal) WinnerSay() {
+// WinnersAndLosers - структура для хранения победителей и проигравших а также количества итераций
+type WinnersAndLosers struct {
+	Counts []int
+	Names  []string
+}
+
+// WinnerSay - выводит крик победителя
+func (a Animal) WinnerSay() {
 	fmt.Println("**Cool winner's cry - " + a.name + "**\n")
 }
 
-func (a *Animal) LoserSay() {
+// LoserSay - выводит плачь проигравшего
+func (a Animal) LoserSay() {
 	fmt.Println("**Loser cry - " + a.name + "**\n")
 }
 
-func (r *Race) Start() (map[string]int, []string) {
+// Start - начало гонки
+func (r *Race) Start() *WinnersAndLosers {
 
-	names := []string{}
+	winnersAndLosers := &WinnersAndLosers{}
+
 	count := 0
-	mapa := make(map[string]int)
 
 	fmt.Println("Race started!")
 	fmt.Println("Distance: ", r.Distance)
@@ -62,110 +72,140 @@ func (r *Race) Start() (map[string]int, []string) {
 	fmt.Println("Fish speed: ", r.Fish.animal.runSpeed)
 	fmt.Println("--------------------------------------")
 
+	// инициализация оставшегося расстояния для каждого животного
 	r.TurtleRemaining = r.Distance
 	r.TigerRemaining = r.Distance
 	r.FishRemaining = r.Distance
 
-	for len(names) < 3 {
+	for len(winnersAndLosers.Names) < 3 {
 		count++
 
 		if r.TurtleRemaining > 0 {
 			r.TurtleRemaining -= r.Turtle.animal.runSpeed
 			if r.TurtleRemaining <= 0 {
-				names = append(names, r.Turtle.animal.name)
-				mapa[r.Turtle.animal.name] = count
+				winnersAndLosers.Names = append(winnersAndLosers.Names, r.Turtle.animal.name)
+				winnersAndLosers.Counts = append(winnersAndLosers.Counts, count)
 			}
 		}
 
 		if r.TigerRemaining > 0 {
 			r.TigerRemaining -= r.Tiger.animal.runSpeed
 			if r.TigerRemaining <= 0 {
-				names = append(names, r.Tiger.animal.name)
-				mapa[r.Tiger.animal.name] = count
+				winnersAndLosers.Names = append(winnersAndLosers.Names, r.Tiger.animal.name)
+				winnersAndLosers.Counts = append(winnersAndLosers.Counts, count)
 			}
 		}
 
 		if r.FishRemaining > 0 {
 			r.FishRemaining -= r.Fish.animal.runSpeed
 			if r.FishRemaining <= 0 {
-				names = append(names, r.Fish.animal.name)
-				mapa[r.Fish.animal.name] = count
+				winnersAndLosers.Names = append(winnersAndLosers.Names, r.Fish.animal.name)
+				winnersAndLosers.Counts = append(winnersAndLosers.Counts, count)
 			}
 		}
 	}
-	return mapa, names
+	return winnersAndLosers
 }
 
-func (r *Race) CreateTeam(carapaceSize, length, teethSize, paws, fin, runSpeedTurtle, runSpeedTiger, runSpeedFish, distance int, color string) *Race {
-	team := &Race{
+// CreateTeam - создание команды
+func (r Race) CreateTeam(turtle Turtle, tiger Tiger, fish Fish, distance int) Race {
+	race := Race{
 		Distance: distance,
-		Turtle: Turtle{
-			animal: Animal{
-				runSpeed: runSpeedTurtle,
-				name:     "Turtle",
-				voice:    "I'm a turtle! And i'm the best!",
-			},
-			carapaceSize: carapaceSize,
-			length:       length,
-		},
-		Tiger: Tiger{
-			animal: Animal{
-				runSpeed: runSpeedTiger,
-				name:     "Tiger",
-				voice:    "I'm a tiger! And i'm the best!",
-			},
-			teethSize: teethSize,
-			paws:      paws,
-		},
-		Fish: Fish{
-			animal: Animal{
-				runSpeed: runSpeedFish,
-				name:     "Fish",
-				voice:    "I'm a fish! And i'm the best!",
-			},
-			fin:   fin,
-			color: color,
-		},
+		Turtle:   turtle,
+		Tiger:    tiger,
+		Fish:     fish,
 	}
-	return team
+	return race
+}
+
+// InitAnimal - инициализация животных
+func InitAnimal(runSpeedTurtle, runSpeedTiger, runSpeedFish int) (Turtle, Tiger, Fish) {
+	turtle := Turtle{
+		animal: Animal{
+			runSpeed: runSpeedTurtle,
+			name:     "Turtle",
+			voice:    "I'm a turtle",
+		},
+		carapaceSize: 10,
+		length:       20,
+	}
+	tiger := Tiger{
+		animal: Animal{
+			runSpeed: runSpeedTiger,
+			name:     "Tiger",
+			voice:    "I'm a tiger",
+		},
+		teethSize: 8,
+		paws:      4,
+	}
+	fish := Fish{
+		animal: Animal{
+			runSpeed: runSpeedFish,
+			name:     "Fish",
+			voice:    "I'm a fish",
+		},
+		fin:   2,
+		color: "red",
+	}
+	return turtle, tiger, fish
+}
+
+// PrintResultOfRace - выводит результаты гонки
+func PrintResultOfRace(winnersAndLosers *WinnersAndLosers, race Race) {
+	// пробегаемся по всем именам всех животных
+	for _, name := range winnersAndLosers.Names {
+
+		if name == winnersAndLosers.Names[0] {
+			fmt.Printf("%s finished the race in %d iteration(s).\n", name, winnersAndLosers.Counts[0])
+		} else if name == winnersAndLosers.Names[1] {
+			fmt.Printf("%s finished the race in %d iteration(s).\n", name, winnersAndLosers.Counts[1])
+		} else {
+			fmt.Printf("%s finished the race in %d iteration(s).\n", name, winnersAndLosers.Counts[2])
+		}
+
+		// присваиваем имя животного для вывода крика
+		race.AnimalCry.name = name
+
+		if name == winnersAndLosers.Names[0] {
+			race.AnimalCry.WinnerSay()
+		} else if name == winnersAndLosers.Names[1] {
+			// тут я не добавляю и пропускаю вывод, потому что если будет else и без else if в условии то оно выведет LoserSay() и для второго места
+			fmt.Print("\n")
+		} else {
+			race.AnimalCry.LoserSay()
+		}
+
+	}
 }
 
 func main() {
 
+	// инициализация флагов
 	var runSpeedTurtle int
 	var runSpeedTiger int
 	var runSpeedFish int
 	var distance int
 
+	// инициализация флагов
 	flag.IntVar(&runSpeedTurtle, "runSpeedTurtle", 10, "Run speed of the turtle")
 	flag.IntVar(&runSpeedTiger, "runSpeedTiger", 100, "Run speed of the tiger")
-	flag.IntVar(&runSpeedFish, "runSpeedFish", 50, "Run speed of the fish")
+	flag.IntVar(&runSpeedFish, "runSpeedFish", 555, "Run speed of the fish")
 	flag.IntVar(&distance, "Distance", 1000, "Distance")
 
+	// парсим флаги
 	flag.Parse()
 
-	team := &Race{}
-	team = team.CreateTeam(10, 20, 8, 4, 2, runSpeedTurtle, runSpeedTiger, runSpeedFish, distance, "red")
-	mapa, names := team.Start()
+	// инициализация животных
+	tiger, fish, turtle := InitAnimal(runSpeedTurtle, runSpeedTiger, runSpeedFish)
 
-	for _, name := range names {
-		time, ok := mapa[name]
+	race := Race{}
+	// создание команды, передаем всех животных и дистанцию из флага
+	race = race.CreateTeam(tiger, fish, turtle, distance)
 
-		if ok {
-			fmt.Printf("%s finished the race in %d iteration(s).\n", name, time)
-			if name == names[1] {
-				fmt.Print("\n")
-			}
-		}
+	// начало гонки
+	winnersAndLosers := race.Start()
 
-		team.Animal = Animal{name: name}
-		if name == names[0] {
-			team.Animal.WinnerSay()
-		} else if name == names[1] {
-			//
-		} else {
-			team.Animal.LoserSay()
-		}
+	// вывод результатов гонки
+	PrintResultOfRace(winnersAndLosers, race)
 
-	}
 }
