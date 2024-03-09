@@ -190,7 +190,7 @@ func main() {
 	flag.IntVar(&runSpeedTurtle, "runSpeedTurtle", 10, "Run speed of the turtle")
 	flag.IntVar(&runSpeedTiger, "runSpeedTiger", 100, "Run speed of the tiger")
 	flag.IntVar(&runSpeedFish, "runSpeedFish", 555, "Run speed of the fish")
-	flag.IntVar(&distance, "Distance", 1000, "Distance")
+	flag.IntVar(&distance, "distance", 1000, "Distance")
 
 	// парсим флаги
 	flag.Parse()
