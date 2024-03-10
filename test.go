@@ -29,7 +29,7 @@ type Fish struct {
 	color  string
 }
 
-// Race AnimalCry - нужно для того чтобы выводить крик победителя и проигравшего
+// Race AnimalCry - нужно, для того чтобы выводить крик победителя и проигравшего
 type Race struct {
 	Distance        int
 	Turtle          Turtle
@@ -41,7 +41,7 @@ type Race struct {
 	AnimalCry       Animal
 }
 
-// WinnersAndLosers - структура для хранения победителей и проигравших а также количества итераций
+// WinnersAndLosers - структура для хранения победителей и проигравших, а также количества итераций
 type WinnersAndLosers struct {
 	Counts []int
 	Names  []string
