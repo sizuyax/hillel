@@ -58,9 +58,9 @@ func (a Animal) LoserSay() {
 }
 
 // Start - начало гонки
-func (r *Race) Start() *WinnersAndLosers {
+func (r *Race) Start() WinnersAndLosers {
 
-	winnersAndLosers := &WinnersAndLosers{}
+	winnersAndLosers := WinnersAndLosers{}
 
 	count := 0
 
@@ -151,7 +151,7 @@ func InitAnimal(runSpeedTurtle, runSpeedTiger, runSpeedFish int) (Turtle, Tiger,
 }
 
 // PrintResultOfRace - выводит результаты гонки
-func PrintResultOfRace(winnersAndLosers *WinnersAndLosers, race Race) {
+func PrintResultOfRace(winnersAndLosers WinnersAndLosers, race Race) {
 	// пробегаемся по всем именам всех животных
 	for _, name := range winnersAndLosers.Names {
 
