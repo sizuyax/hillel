@@ -69,18 +69,24 @@ func Fight(hero *models.Hero, snake *models.Snake) (string, error) {
 			logrus.Println("Змей: а давай!\n\n")
 			time.Sleep(5 * time.Second)
 
-			usefa := []string{"камень", "ножницы", "бумага"}
+			usefa := []string{"камень", "ножницы", "бумага", "фак"}
 
 			logrus.Println("Богатырь выбрал..")
 			time.Sleep(2 * time.Second)
-			randUsefaHero := rand.Intn(3)
+			randUsefaHero := rand.Intn(4)
 			logrus.Println(usefa[randUsefaHero], "\n\n")
 
 			logrus.Println("Змей выбрал..")
 			time.Sleep(2 * time.Second)
-			randUsefaSnake := rand.Intn(3)
-
+			randUsefaSnake := rand.Intn(4)
 			logrus.Println(usefa[randUsefaSnake], "\n\n")
+
+			if usefa[randUsefaHero] == "фак" {
+				return "", errors.New("богатырь играет нечесно! Он выбрал фак, что не разрешено")
+			}
+			if usefa[randUsefaSnake] == "фак" {
+				return "", errors.New("змей играет нечесно! Он выбрал фак, что не разрешено")
+			}
 
 			if randUsefaHero == randUsefaSnake {
 				panic("К сожалению ничья поэтому побеждает Влад!")
