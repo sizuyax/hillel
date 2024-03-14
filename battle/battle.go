@@ -1,6 +1,7 @@
 package battle
 
 import (
+	"errors"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"hillel/models"
@@ -56,7 +57,7 @@ func GrowHeads(snake *models.Snake, hit int) {
 	logrus.Printf("Змей вырос на %d голов, теперь у него %d голов\n\n", growth, snake.Heads)
 }
 
-func Fight(hero *models.Hero, snake *models.Snake) string {
+func Fight(hero *models.Hero, snake *models.Snake) (string, error) {
 	battle := models.NewBattle()
 	for {
 		battle.Round++
@@ -78,6 +79,7 @@ func Fight(hero *models.Hero, snake *models.Snake) string {
 			logrus.Println("Змей выбрал..")
 			time.Sleep(2 * time.Second)
 			randUsefaSnake := rand.Intn(3)
+
 			logrus.Println(usefa[randUsefaSnake], "\n\n")
 
 			if randUsefaHero == randUsefaSnake {
@@ -85,7 +87,7 @@ func Fight(hero *models.Hero, snake *models.Snake) string {
 			}
 			if (randUsefaHero == 0 && randUsefaSnake == 1) || (randUsefaHero == 1 && randUsefaSnake == 2) || (randUsefaHero == 2 && randUsefaSnake == 0) {
 				logrus.Println("Богатырь: ХААА лашок я выиграл")
-				return fmt.Sprintf("Победил %s! Благодаря игре Камень, Ножницы, Бумага. У него был %s", hero.Name, usefa[randUsefaHero])
+				return fmt.Sprintf("Победил %s! Благодаря игре Камень, Ножницы, Бумага. У него был %s", hero.Name, usefa[randUsefaHero]), nil
 			}
 
 			logrus.Println("Змей: СЮДААА, заносик")
@@ -98,13 +100,13 @@ func Fight(hero *models.Hero, snake *models.Snake) string {
 		hit := HeroHit(snake)
 
 		if snake.Heads <= 0 {
-			return fmt.Sprintf("Победил %s! Это заняло %s раундов!", hero.Name, battle.Round)
+			return fmt.Sprintf("Победил %s! Это заняло %d раундов!", hero.Name, battle.Round), nil
 		}
 		if snake.Heads >= 200 {
 			panic("Змей Феодосий выиграл! Богатырь паникует и убегает")
 		}
 		if snake.Heads == 5 {
-			panic("Змей: ААААА у меня фобия на 5 голов")
+			return "", errors.New("Змей: ААААА у меня фобия на 5 голов")
 		}
 
 		GrowHeads(snake, hit)

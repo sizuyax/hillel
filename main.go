@@ -16,7 +16,10 @@ func main() {
 		}
 	}()
 
-	result := battle.Fight(&hero, &snake)
+	result, err := battle.Fight(&hero, &snake)
+	if err != nil {
+		logrus.Fatal(err)
+	}
 
 	logrus.Println(result)
 }
