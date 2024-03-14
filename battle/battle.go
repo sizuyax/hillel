@@ -11,6 +11,8 @@ import (
 func HeroHit(snake *models.Snake) int {
 	rand.Seed(time.Now().UnixNano())
 
+	logrus.Println("Богатырь рубает головы змею и...\n\n")
+
 	randStrongAttack := rand.Intn(2)
 
 	hit := 1
@@ -27,7 +29,7 @@ func HeroHit(snake *models.Snake) int {
 
 	snake.Heads -= hit
 
-	fmt.Printf("Багатир зрубив %d голів, залишилося %d\n", hit, snake.Heads)
+	logrus.Printf("Богатырь срубил %d голов, осталось %d\n", hit, snake.Heads)
 	return hit
 }
 
@@ -51,7 +53,7 @@ func GrowHeads(snake *models.Snake, hit int) {
 
 	snake.Heads += growth
 
-	fmt.Printf("Змій відріс на %d голів, тепер у нього %d голів\n", growth, snake.Heads)
+	logrus.Printf("Змей вырос на %d голов, теперь у него %d голов\n\n", growth, snake.Heads)
 }
 
 func Fight(hero *models.Hero, snake *models.Snake) string {
@@ -59,18 +61,28 @@ func Fight(hero *models.Hero, snake *models.Snake) string {
 	for {
 		battle.Round++
 
-		if battle.Round > 200 {
+		if battle.Round > 600 {
 			time.Sleep(1 * time.Second)
 			logrus.Println("Богатырь: чел, давай на юзефа, кто выиграл тот и выиграл! А то затянулось это..")
-			time.Sleep(1 * time.Second)
-			logrus.Println("Змей: а давай!")
-			time.Sleep(1 * time.Second)
+			time.Sleep(5 * time.Second)
+			logrus.Println("Змей: а давай!\n\n")
+			time.Sleep(5 * time.Second)
 
 			usefa := []string{"камень", "ножницы", "бумага"}
 
+			logrus.Println("Богатырь выбрал..")
+			time.Sleep(2 * time.Second)
 			randUsefaHero := rand.Intn(3)
-			randUsefaSnake := rand.Intn(3)
+			logrus.Println(usefa[randUsefaHero], "\n\n")
 
+			logrus.Println("Змей выбрал..")
+			time.Sleep(2 * time.Second)
+			randUsefaSnake := rand.Intn(3)
+			logrus.Println(usefa[randUsefaSnake], "\n\n")
+
+			if randUsefaHero == randUsefaSnake {
+				panic("К сожалению ничья поэтому побеждает Влад!")
+			}
 			if (randUsefaHero == 0 && randUsefaSnake == 1) || (randUsefaHero == 1 && randUsefaSnake == 2) || (randUsefaHero == 2 && randUsefaSnake == 0) {
 				logrus.Println("Богатырь: ХААА лашок я выиграл")
 				return fmt.Sprintf("Победил %s! Благодаря игре Камень, Ножницы, Бумага. У него был %s", hero.Name, usefa[randUsefaHero])
@@ -86,10 +98,10 @@ func Fight(hero *models.Hero, snake *models.Snake) string {
 		hit := HeroHit(snake)
 
 		if snake.Heads <= 0 {
-			return fmt.Sprintf("Победив %s! Это заняло %s раундов!", hero.Name, battle.Round)
+			return fmt.Sprintf("Победил %s! Это заняло %s раундов!", hero.Name, battle.Round)
 		}
 		if snake.Heads >= 200 {
-			panic("Змій переміг! Багатир лякається та панікує")
+			panic("Змей Феодосий выиграл! Богатырь паникует и убегает")
 		}
 		if snake.Heads == 5 {
 			panic("Змей: ААААА у меня фобия на 5 голов")
