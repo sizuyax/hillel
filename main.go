@@ -1,233 +1,119 @@
 package main
 
 import (
-	"errors"
-	"github.com/sirupsen/logrus"
-	"go.uber.org/zap"
-	"math"
+	"flag"
+	"fmt"
 	"math/rand"
-	"strconv"
+	"sync"
 	"time"
 )
 
-type Generator interface {
-	Generate() interface{}
-	GenerateSlice() []interface{}
-	GenerateWithParam(param int) (interface{}, error)
-}
-
-type IntGenerator struct{}
-
-func (IntGenerator) Generate() interface{} {
-	return rand.Int()
-}
-
-func (IntGenerator) GenerateSlice() []interface{} {
-	rand.Seed(time.Now().UnixNano())
-
-	b := make([]interface{}, 10)
-
-	for i := range b {
-		randNum := rand.Intn(10)
-		b[i] = randNum
-	}
-
-	return b
-}
-
-func (IntGenerator) GenerateWithParam(param int) (interface{}, error) {
-	if param < 0 {
-		return nil, errors.New("param should be non-negative")
-	}
-	return rand.Intn(param), nil
-}
-
-type StringGenerator struct{}
-
-func (StringGenerator) Generate() interface{} {
-	rand.Seed(time.Now().UnixNano())
-
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-	b := make([]rune, 10)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-	return string(b)
-}
-
-func (StringGenerator) GenerateSlice() []interface{} {
-	rand.Seed(time.Now().UnixNano())
-
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-	b := make([]interface{}, 10)
-	for i := range b {
-		randomString := make([]rune, 4)
-		for j := range randomString {
-			randomString[j] = letters[rand.Intn(len(letters))]
-		}
-		b[i] = string(randomString)
-	}
-	return b
-}
-
-func (StringGenerator) GenerateWithParam(param int) (interface{}, error) {
-	rand.Seed(time.Now().UnixNano())
-
-	if param < 0 {
-		return nil, errors.New("param should be non-negative")
-	}
-
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-	b := make([]rune, param)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-	return string(b), nil
-}
-
-type BoolGenerator struct{}
-
-func (BoolGenerator) Generate() interface{} {
-	return rand.Intn(2) == 1
-}
-
-func (BoolGenerator) GenerateSlice() []interface{} {
-	rand.Seed(time.Now().UnixNano())
-
-	b := make([]interface{}, 10)
-	for i := range b {
-		b[i] = rand.Intn(2) == 1
-	}
-	return b
-}
-
-func (BoolGenerator) GenerateWithParam(param int) (interface{}, error) {
-	if param < 0 || param > 1 {
-		return nil, errors.New("param should be 0 or 1")
-	}
-
-	randBool := rand.Intn(param)
-	if randBool == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}
-
-type FloatGenerator struct{}
-
-func (FloatGenerator) Generate() interface{} {
-
-	val := rand.Float64() * float64(100)
-
-	val = math.Round(val*100) / 100
-
-	symbols := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-	randomSymbol := symbols[rand.Intn(len(symbols))]
-
-	valStr := strconv.FormatFloat(val, 'f', -1, 64)
-
-	valStr += string(randomSymbol)
-
-	return valStr
-}
-
-func (FloatGenerator) GenerateSlice() []interface{} {
-	rand.Seed(time.Now().UnixNano())
-
-	var result []interface{}
-
-	for i := 0; i < 10; i++ {
-		val := rand.Float64() * 100
-		val = math.Round(val*100) / 100
-
-		symbols := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-		randomSymbol := symbols[rand.Intn(len(symbols))]
-
-		valStr := strconv.FormatFloat(val, 'f', -1, 64)
-		valStr += string(randomSymbol)
-
-		result = append(result, valStr)
-	}
-
-	return result
-}
-
-func (FloatGenerator) GenerateWithParam(param int) (interface{}, error) {
-	if param < 0 {
-		return nil, errors.New("param should be non-negative")
-	}
-
-	val := rand.Float64() * float64(param)
-
-	val = math.Round(val*100) / 100
-
-	symbols := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-	randomSymbol := symbols[rand.Intn(len(symbols))]
-
-	valStr := strconv.FormatFloat(val, 'f', -1, 64)
-
-	valStr += string(randomSymbol)
-
-	return valStr, nil
-}
-
-func GenerateAndPrint(g Generator) {
-	logrus.Println("Используем Generate:")
-	logrus.Println("Тип:", g.Generate(), "\n\n")
-	logrus.Println("Используем GenerateSlice:")
-	logrus.Println("Тип:", g.GenerateSlice(), "\n\n")
-
-	val, err := g.GenerateWithParam(10)
-	if err != nil {
-		zap.Error(err)
-	} else {
-		logrus.Println("Используем GenerateWithParam (param = 10):")
-		logrus.Println("Тип:", val)
-	}
-
-	switch val := val.(type) {
-	case int:
-		logrus.Println("Generated type is int: ", val)
-	case float64:
-		logrus.Println("Generated type is float64: ", val)
-	case bool:
-		logrus.Println("Generated type is bool: ", val)
-	case string:
-		logrus.Println("Generated type is string: ", val)
-	default:
-		logrus.Println("Unknown generated type")
-	}
-
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
-
-	zapLogger := logger.Sugar()
-
-	_, err = g.GenerateWithParam(-1)
-	if err != nil {
-		zapLogger.Errorw("Error generating with param", "error", err)
-	}
-
-	_, err = g.GenerateWithParam(2)
-	if err != nil {
-		zapLogger.Errorw("Error generating with param", "error", err)
-	}
-}
-
 func main() {
-	intGen := IntGenerator{}
-	stringGen := StringGenerator{}
-	boolGen := BoolGenerator{}
-	floatGen := FloatGenerator{}
+	var chooseTask int
+	var numReceivers int
 
-	GenerateAndPrint(intGen)
-	GenerateAndPrint(stringGen)
-	GenerateAndPrint(boolGen)
-	GenerateAndPrint(floatGen)
+	flag.IntVar(&chooseTask, "chooseTask", 2, "choose a task")
+	flag.IntVar(&numReceivers, "numReceivers", 1, "number of receivers")
+	flag.Parse()
+
+	switch chooseTask {
+	case 1:
+		task1()
+	case 2:
+		task2(numReceivers)
+	default:
+		fmt.Println("Неправильный ввод")
+	}
+}
+
+func task1() {
+	ch := make(chan int)
+	done := make(chan struct{})
+	defer close(done)
+
+	go receiverFirstTask(ch, done)
+
+	const numGoroutines = 100
+	const maxParallel = 10
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, maxParallel)
+
+	for i := 0; i < numGoroutines; i++ {
+		wg.Add(1)
+
+		go func(workerID int) {
+			defer wg.Done()
+
+			sem <- struct{}{}
+			defer func() { <-sem }()
+
+			for j := 0; j < 10; j++ {
+				value := workerID + j
+				ch <- value
+
+				fmt.Printf("Горутина %d: Кладет %d в канал\n", workerID, value)
+
+				randSleep := time.Duration(rand.Intn(1000)+10) * time.Millisecond
+				time.Sleep(randSleep)
+
+				fmt.Printf("Горутина %d завершила свою работу!\n", workerID)
+			}
+		}(i)
+	}
+
+	wg.Wait()
+	close(ch)
+}
+
+func receiverFirstTask(ch <-chan int, done <-chan struct{}) {
+	for {
+		select {
+		case value := <-ch:
+			fmt.Println("Ресивер получил", value)
+		case <-done:
+			return
+		}
+	}
+}
+
+func task2(numReceivers int) {
+	ch := make(chan int)
+
+	var wg sync.WaitGroup
+	wg.Add(numReceivers)
+
+	go publisherSecondTask(ch)
+
+	for i := 0; i < numReceivers; i++ {
+		go func() {
+			defer wg.Done()
+			receiverSecondTask(ch)
+		}()
+	}
+
+	wg.Wait()
+}
+
+func publisherSecondTask(ch chan<- int) {
+	for i := 0; i < 10; i++ {
+		ch <- i
+
+		fmt.Printf("Паблишер отправил сообщение: %d\n", i)
+
+		time.Sleep(time.Millisecond * 500)
+	}
+
+	close(ch)
+}
+
+func receiverSecondTask(ch <-chan int) {
+	for {
+		value, ok := <-ch
+
+		if !ok {
+			return
+		}
+
+		fmt.Println("Ресивер получил", value)
+	}
 }
