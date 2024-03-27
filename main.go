@@ -1,30 +1,21 @@
 package main
 
 import (
-	"fmt"
-	"github.com/sirupsen/logrus"
-	"hillel/battle"
-	"hillel/errors"
-	"hillel/models"
-	"math/rand"
-	"time"
+	"flag"
+	"hillel/http_server"
+	"hillel/tcp_server"
 )
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
+	var server int
 
-	hero := models.NewHero()
-	snake := models.NewSnake()
+	flag.IntVar(&server, "server", 1, "which one server do you want to start")
+	flag.Parse()
 
-	defer func() {
-		if r := recover(); r != nil {
-			logrus.Error("Помилка: ", r)
-			if err, ok := r.(error); ok {
-				errors.LogError(err)
-			}
-		}
-	}()
-
-	result := battle.Fight(&hero, &snake)
-	fmt.Println(result)
+	switch server {
+	case 1:
+		http_server.HttpServer()
+	case 2:
+		tcp_server.TcpServer()
+	}
 }
