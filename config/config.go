@@ -9,7 +9,8 @@ import (
 
 func InitConfig() (*models.Config, error) {
 	if err := godotenv.Load(); err != nil {
-		logger.Logger.Fatal(err)
+		logger.Logger.Error(err)
+		return nil, err
 	}
 
 	cfg := &models.Config{}

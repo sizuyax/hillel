@@ -3,13 +3,13 @@ package http
 import (
 	"github.com/labstack/echo/v4"
 	"hillel/config"
-	"hillel/handlers"
 	"hillel/logger"
+	"hillel/server/http/routes"
 )
 
 type Server struct {
 	e    *echo.Echo
-	Port string
+	port string
 }
 
 func InitWebServer() (*Server, error) {
@@ -23,14 +23,14 @@ func InitWebServer() (*Server, error) {
 
 	logger.NewLogger(*cfg)
 
-	handlers.AllHandlers(e)
+	routes.SetupBookRoutes(e)
 
 	return &Server{
 		e:    e,
-		Port: cfg.Port,
+		port: cfg.Port,
 	}, nil
 }
 
 func (s *Server) StartWebServer() error {
-	return s.e.Start(s.Port)
+	return s.e.Start(s.port)
 }

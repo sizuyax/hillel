@@ -1,4 +1,4 @@
-package services
+package handlers
 
 import (
 	"fmt"
@@ -20,17 +20,10 @@ var putRequestBook struct {
 	SplitNewBooks string
 }
 
-var delRequestBook struct {
-	DeleteBooks []string `json:"DeleteBooks"`
-}
-
 func GetBooks(c echo.Context) error {
 
 	if postRequestBook.Books == nil {
-		return c.JSON(http.StatusBadRequest, errors.Error{
-			Code:    "INCORRECT_REQUEST",
-			Message: "books cannot be empty!",
-		})
+		return c.JSON(http.StatusBadRequest, errors.ErrEmptyBooks)
 	}
 
 	var bookPrint []string
@@ -50,17 +43,11 @@ func PostBooks(c echo.Context) error {
 
 	if err := c.Bind(&postRequestBook); err != nil {
 		logger.Logger.Error(err)
-		return c.JSON(http.StatusInternalServerError, errors.Error{
-			Code:    "INCORRECT_REQUEST",
-			Message: "failed unmarshal request",
-		})
+		return c.JSON(http.StatusInternalServerError, errors.ErrUnmarshalFail)
 	}
 
 	if postRequestBook.Books == nil {
-		return c.JSON(http.StatusBadRequest, errors.Error{
-			Code:    "INCORRECT_REQUEST",
-			Message: "books cannot be empty!",
-		})
+		return c.JSON(http.StatusBadRequest, errors.ErrEmptyBooks)
 	}
 
 	var bookPrint []string
@@ -82,17 +69,11 @@ func PutBooks(c echo.Context) error {
 
 	if err := c.Bind(&putRequestBook); err != nil {
 		logger.Logger.Error(err)
-		return c.JSON(http.StatusInternalServerError, errors.Error{
-			Code:    "INCORRECT_REQUEST",
-			Message: "failed unmarshal request",
-		})
+		return c.JSON(http.StatusInternalServerError, errors.ErrUnmarshalFail)
 	}
 
 	if postRequestBook.Books == nil {
-		return c.JSON(http.StatusBadRequest, errors.Error{
-			Code:    "INCORRECT_REQUEST",
-			Message: "books cannot be empty!",
-		})
+		return c.JSON(http.StatusBadRequest, errors.ErrEmptyBooks)
 	}
 
 	var bookPrint []string
@@ -114,44 +95,33 @@ func PutBooks(c echo.Context) error {
 
 func DeleteBooks(c echo.Context) error {
 
-	if err := c.Bind(&delRequestBook); err != nil {
+	if postRequestBook.Books == nil {
+		return c.JSON(http.StatusBadRequest, errors.ErrEmptyBooks)
+	}
+
+	deleteBook := c.QueryParam("book")
+
+	if deleteBook == "all" {
+		postRequestBook.Books = nil
+		return c.String(http.StatusOK, "All books was deleted successfully!")
+	}
+
+	index, err := strconv.Atoi(deleteBook)
+	if err != nil {
 		logger.Logger.Error(err)
 		return c.JSON(http.StatusInternalServerError, errors.Error{
-			Code:    "INCORRECT_REQUEST",
-			Message: "failed unmarshal request",
+			Code:    "SERVER_ERROR",
+			Message: "server error, cannot convert index",
 		})
 	}
 
-	if postRequestBook.Books == nil {
-		return c.JSON(http.StatusBadRequest, errors.Error{
-			Code:    "INCORRECT_REQUEST",
-			Message: "books cannot be empty!",
-		})
+	index--
+
+	if index >= 0 && index < len(postRequestBook.Books) {
+		postRequestBook.Books = append(postRequestBook.Books[:index], postRequestBook.Books[index+1:]...)
 	}
 
-	for _, book := range delRequestBook.DeleteBooks {
-		if book == "all" {
-			postRequestBook.Books = nil
-			return c.String(http.StatusOK, "All books was deleted successfully!")
-		}
-
-		index, err := strconv.Atoi(book)
-		if err != nil {
-			logger.Logger.Error(err)
-			return c.JSON(http.StatusInternalServerError, errors.Error{
-				Code:    "INCORRECT_REQUEST",
-				Message: "server error, cannot convert index",
-			})
-		}
-
-		index--
-
-		if index >= 0 && index < len(postRequestBook.Books) {
-			postRequestBook.Books = append(postRequestBook.Books[:index], postRequestBook.Books[index+1:]...)
-		}
-	}
-
-	logger.Logger.Debugf("delete books called [books]: %s", delRequestBook.DeleteBooks)
+	logger.Logger.Debugf("delete books called [book index]: %s", deleteBook)
 
 	logger.Logger.Info("books successfully deleted!")
 
