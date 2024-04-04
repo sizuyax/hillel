@@ -11,13 +11,13 @@ import (
 )
 
 var postRequestBook struct {
-	Books      []string `json:"Books"`
-	SplitBooks string
+	Books           []string `json:"Books"`
+	booksListString string
 }
 
 var putRequestBook struct {
-	NewBooks      []string `json:"NewBooks"`
-	SplitNewBooks string
+	NewBooks           []string `json:"NewBooks"`
+	newBooksListString string
 }
 
 func GetBooks(c echo.Context) error {
@@ -32,11 +32,11 @@ func GetBooks(c echo.Context) error {
 		bookPrint = append(bookPrint, book)
 	}
 
-	postRequestBook.SplitBooks = strings.Join(bookPrint, ", ")
+	postRequestBook.booksListString = strings.Join(bookPrint, ", ")
 
-	logger.Logger.Debugf("get books called [books]: %s", postRequestBook.SplitBooks)
+	logger.Logger.Debugf("get books called [books]: %s", postRequestBook.booksListString)
 
-	return c.String(http.StatusOK, "Books: "+postRequestBook.SplitBooks)
+	return c.String(http.StatusOK, "Books: "+postRequestBook.booksListString)
 }
 
 func PostBooks(c echo.Context) error {
@@ -56,13 +56,13 @@ func PostBooks(c echo.Context) error {
 		bookPrint = append(bookPrint, book)
 	}
 
-	postRequestBook.SplitBooks = strings.Join(bookPrint, ", ")
+	postRequestBook.booksListString = strings.Join(bookPrint, ", ")
 
-	logger.Logger.Debugf("post books called [books]: %s", postRequestBook.SplitBooks)
+	logger.Logger.Debugf("post books called [books]: %s", postRequestBook.booksListString)
 
 	logger.Logger.Info("books successfully added!")
 
-	return c.String(http.StatusOK, fmt.Sprintf("[Books]: %s successfully added!", postRequestBook.SplitBooks))
+	return c.String(http.StatusOK, fmt.Sprintf("[Books]: %s successfully added!", postRequestBook.booksListString))
 }
 
 func PutBooks(c echo.Context) error {
@@ -84,13 +84,13 @@ func PutBooks(c echo.Context) error {
 
 	postRequestBook.Books = putRequestBook.NewBooks
 
-	putRequestBook.SplitNewBooks = strings.Join(bookPrint, ", ")
+	putRequestBook.newBooksListString = strings.Join(bookPrint, ", ")
 
-	logger.Logger.Debugf("put books called [books]: %s", postRequestBook.SplitBooks)
+	logger.Logger.Debugf("put books called [books]: %s", postRequestBook.booksListString)
 
 	logger.Logger.Info("books successfully updated!")
 
-	return c.String(http.StatusOK, fmt.Sprintf("Book successfully updated, [Old Books]: %s, [New Books]: %s", postRequestBook.SplitBooks, putRequestBook.SplitNewBooks))
+	return c.String(http.StatusOK, fmt.Sprintf("Book successfully updated, [Old Books]: %s, [New Books]: %s", postRequestBook.booksListString, putRequestBook.newBooksListString))
 }
 
 func DeleteBooks(c echo.Context) error {
