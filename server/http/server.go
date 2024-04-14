@@ -1,36 +1,35 @@
 package http
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
-	"hillel/config"
-	"hillel/logger"
-	"hillel/server/http/routes"
+	"github.com/sirupsen/logrus"
+	"golang.org/x/net/context"
+	"project-auction/server/http/routes"
 )
 
 type Server struct {
 	e    *echo.Echo
-	port string
+	log  *logrus.Logger
+	port int
 }
 
-func InitWebServer() (*Server, error) {
+func InitWebServer(port int, log *logrus.Logger) *Server {
 	e := echo.New()
 
-	cfg, err := config.InitConfig()
-	if err != nil {
-		logger.Logger.Error(err)
-		return nil, err
-	}
-
-	logger.NewLogger(*cfg)
-
-	routes.SetupBookRoutes(e)
+	routes.SetupRoutes(e)
 
 	return &Server{
 		e:    e,
-		port: cfg.Port,
-	}, nil
+		log:  log,
+		port: port,
+	}
 }
 
-func (s *Server) StartWebServer() error {
-	return s.e.Start(s.port)
+func (s Server) StartWebServer() error {
+	return s.e.Start(fmt.Sprintf(":%v", s.port))
+}
+
+func (s Server) StopWebServer(ctx context.Context) error {
+	return s.e.Shutdown(ctx)
 }

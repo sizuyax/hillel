@@ -2,15 +2,20 @@ package routes
 
 import (
 	"github.com/labstack/echo/v4"
-	"hillel/server/http/handlers"
+	echoSwagger "github.com/swaggo/echo-swagger"
+	"project-auction/server/http/handlers"
 )
 
-func SetupBookRoutes(e *echo.Echo) {
-	e.GET("/books", handlers.GetBooks)
+func SetupRoutes(e *echo.Echo) {
+	e.GET("/items", handlers.GetItems)
 
-	e.POST("/newbooks", handlers.PostBooks)
+	e.GET("/item/{id}", handlers.GetItemByID)
 
-	e.PUT("/updatebooks", handlers.PutBooks)
+	e.POST("/create-item", handlers.CreateItem)
 
-	e.DELETE("/deletebooks", handlers.DeleteBooks)
+	e.PUT("/update-item", handlers.UpdateItem)
+
+	e.DELETE("/delete-item", handlers.DeleteItem)
+
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 }

@@ -3,21 +3,23 @@ package config
 import (
 	"github.com/caarlos0/env"
 	"github.com/joho/godotenv"
-	"hillel/logger"
-	"hillel/models"
+	"github.com/labstack/gommon/log"
 )
 
-func InitConfig() (*models.Config, error) {
-	if err := godotenv.Load(); err != nil {
-		logger.Logger.Error(err)
-		return nil, err
+type Config struct {
+	Port     int    `env:"PORT" envDefault:"1323"`
+	LogLevel string `env:"LOG_LEVEL" envDefault:"info"`
+}
+
+func MustLoad() *Config {
+	if err := godotenv.Load(".env"); err != nil {
+		log.Error(err)
 	}
 
-	cfg := &models.Config{}
+	cfg := &Config{}
 	if err := env.Parse(cfg); err != nil {
-		logger.Logger.Error(err)
-		return nil, err
+		log.Error(err)
 	}
 
-	return cfg, nil
+	return cfg
 }

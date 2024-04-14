@@ -1,0 +1,90 @@
+basePath: /
+definitions:
+  handlers.Item:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: integer
+    type: object
+host: http://swagger.io/terms/
+info:
+  contact: {}
+  description: Hillel Project
+  title: Project-Auction API
+  version: "1.0"
+paths:
+  /create-item:
+    post:
+      consumes:
+      - application/json
+      description: Create item
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+      summary: Create item
+      tags:
+      - models.Item
+  /delete-item:
+    delete:
+      consumes:
+      - application/json
+      description: Delete item
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete item
+      tags:
+      - models.Item
+  /item{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get item by id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.Item'
+      summary: Get item
+      tags:
+      - models.Item
+  /items:
+    get:
+      consumes:
+      - application/json
+      description: Get all items
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.Item'
+            type: array
+      summary: Get items
+      tags:
+      - models.Item
+  /update-item:
+    put:
+      consumes:
+      - application/json
+      description: Update item
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update item
+      tags:
+      - models.Item
+swagger: "2.0"
