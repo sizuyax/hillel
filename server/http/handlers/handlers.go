@@ -17,7 +17,7 @@ type Item struct {
 // @Success 		200 				{object} 	[]Item
 // @Router 			/items 				[get]
 func GetItems(c echo.Context) error {
-	return nil
+	panic("implement me")
 }
 
 // GetItemByID 		godoc
@@ -29,7 +29,7 @@ func GetItems(c echo.Context) error {
 // @Success 		200 				{object} 	Item
 // @Router 			/item{id} 			[get]
 func GetItemByID(c echo.Context) error {
-	return nil
+	panic("implement me")
 }
 
 // CreateItem 		godoc
@@ -41,7 +41,7 @@ func GetItemByID(c echo.Context) error {
 // @Success 		201
 // @Router 			/create-item 		[post]
 func CreateItem(c echo.Context) error {
-	return nil
+	panic("implement me")
 }
 
 // UpdateItem 		godoc
@@ -53,7 +53,7 @@ func CreateItem(c echo.Context) error {
 // @Success 		200
 // @Router 			/update-item 		[put]
 func UpdateItem(c echo.Context) error {
-	return nil
+	panic("implement me")
 }
 
 // DeleteItem 		godoc
@@ -65,5 +65,5 @@ func UpdateItem(c echo.Context) error {
 // @Success 		200
 // @Router 			/delete-item 		[delete]
 func DeleteItem(c echo.Context) error {
-	return nil
+	panic("implement me")
 }
