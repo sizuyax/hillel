@@ -32,7 +32,7 @@ func main() {
 		slog.Int("port", cfg.Port),
 	)
 
-	server := httpServer.InitWebServer()
+	server := httpServer.InitWebServer(log)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Port),

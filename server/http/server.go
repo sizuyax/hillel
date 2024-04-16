@@ -2,13 +2,16 @@ package httpServer
 
 import (
 	"github.com/labstack/echo/v4"
-	"project-auction/server/http/routes"
+	"log/slog"
+	"project-auction/handlers"
 )
 
-func InitWebServer() *echo.Echo {
-	e := echo.New()
+func InitWebServer(log *slog.Logger) *echo.Echo {
+	router := echo.New()
 
-	routes.SetupRoutes(e)
+	handlers.NewHandler(log, handlers.Config{
+		EchoRouter: router,
+	})
 
-	return e
+	return router
 }
