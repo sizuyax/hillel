@@ -21,7 +21,7 @@ func (h Handler) GetItems(c echo.Context) error {
 // @Accept  		json
 // @Produce  		json
 // @Success 		200 				{object} 	Item
-// @Router 			/item{id} 			[get]
+// @Router 			/item/{id} 			[get]
 func (h Handler) GetItemByID(c echo.Context) error {
 	panic("implement me")
 }
@@ -33,7 +33,7 @@ func (h Handler) GetItemByID(c echo.Context) error {
 // @Accept  		json
 // @Produce  		json
 // @Success 		201
-// @Router 			/create-item 		[post]
+// @Router 			/item 				[post]
 func (h Handler) CreateItem(c echo.Context) error {
 	panic("implement me")
 }
@@ -45,7 +45,7 @@ func (h Handler) CreateItem(c echo.Context) error {
 // @Accept  		json
 // @Produce  		json
 // @Success 		200
-// @Router 			/update-item 		[put]
+// @Router 			/item/{id} 			[put]
 func (h Handler) UpdateItem(c echo.Context) error {
 	panic("implement me")
 }
@@ -57,7 +57,7 @@ func (h Handler) UpdateItem(c echo.Context) error {
 // @Accept  		json
 // @Produce  		json
 // @Success 		200
-// @Router 			/delete-item 		[delete]
+// @Router 			/item/{id} 			[delete]
 func (h Handler) DeleteItem(c echo.Context) error {
 	panic("implement me")
 }
