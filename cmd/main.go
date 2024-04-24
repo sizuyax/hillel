@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"golang.org/x/net/context"
 	"log/slog"
 	"net/http"
 	"os"
@@ -10,9 +9,11 @@ import (
 	"project-auction/config"
 	"project-auction/docs"
 	"project-auction/lib/logger"
-	"project-auction/server/http"
+	httpServer "project-auction/server/http"
 	"syscall"
 	"time"
+
+	"golang.org/x/net/context"
 )
 
 // @title  			Project-Auction API
@@ -27,16 +28,15 @@ func main() {
 	cfg := config.MustLoad()
 
 	log := logger.SetupLogger(cfg.LogLevel)
-
 	log = log.With(
 		slog.Int("port", cfg.Port),
 	)
 
-	server := httpServer.InitWebServer(log)
+	router := httpServer.InitWebServer(log)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Port),
-		Handler: server,
+		Handler: router,
 	}
 
 	go func() {
@@ -47,6 +47,10 @@ func main() {
 
 	log.Info("http server started")
 
+	gracefulShutdown(srv, log)
+}
+
+func gracefulShutdown(srv *http.Server, log *slog.Logger) {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
