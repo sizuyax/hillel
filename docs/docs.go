@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/create-item": {
+        "/item": {
             "post": {
                 "description": "Create item",
                 "consumes": [
@@ -35,7 +35,46 @@ const docTemplate = `{
                 }
             }
         },
-        "/delete-item": {
+        "/item/{id}": {
+            "get": {
+                "description": "Get item by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "models.Item"
+                ],
+                "summary": "Get item",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Item"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update item",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "models.Item"
+                ],
+                "summary": "Update item",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
             "delete": {
                 "description": "Delete item",
                 "consumes": [
@@ -77,49 +116,6 @@ const docTemplate = `{
                                 "$ref": "#/definitions/handlers.Item"
                             }
                         }
-                    }
-                }
-            }
-        },
-        "/item{id}": {
-            "get": {
-                "description": "Get item by id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "models.Item"
-                ],
-                "summary": "Get item",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.Item"
-                        }
-                    }
-                }
-            }
-        },
-        "/update-item": {
-            "put": {
-                "description": "Update item",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "models.Item"
-                ],
-                "summary": "Update item",
-                "responses": {
-                    "200": {
-                        "description": "OK"
                     }
                 }
             }

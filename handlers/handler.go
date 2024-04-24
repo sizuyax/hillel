@@ -23,9 +23,8 @@ type Config struct {
 func NewHandler(log *slog.Logger, cfg Config) {
 	h := Handler{log: log}
 
-	cfg.EchoRouter.GET("/items", h.GetItems)
-
-	itemGroup := cfg.EchoRouter.Group("/item")
+	itemGroup := cfg.EchoRouter.Group("/items")
+	itemGroup.GET("", h.GetItems)
 	itemGroup.GET("/:id", h.GetItemByID)
 	itemGroup.POST("", h.CreateItem)
 	itemGroup.PUT("/:id", h.UpdateItem)

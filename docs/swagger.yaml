@@ -16,7 +16,7 @@ info:
   title: Project-Auction API
   version: "1.0"
 paths:
-  /create-item:
+  /item:
     post:
       consumes:
       - application/json
@@ -29,7 +29,7 @@ paths:
       summary: Create item
       tags:
       - models.Item
-  /delete-item:
+  /item/{id}:
     delete:
       consumes:
       - application/json
@@ -42,7 +42,6 @@ paths:
       summary: Delete item
       tags:
       - models.Item
-  /item{id}:
     get:
       consumes:
       - application/json
@@ -55,6 +54,18 @@ paths:
           schema:
             $ref: '#/definitions/handlers.Item'
       summary: Get item
+      tags:
+      - models.Item
+    put:
+      consumes:
+      - application/json
+      description: Update item
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update item
       tags:
       - models.Item
   /items:
@@ -72,19 +83,6 @@ paths:
               $ref: '#/definitions/handlers.Item'
             type: array
       summary: Get items
-      tags:
-      - models.Item
-  /update-item:
-    put:
-      consumes:
-      - application/json
-      description: Update item
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Update item
       tags:
       - models.Item
 swagger: "2.0"
