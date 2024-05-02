@@ -15,7 +15,37 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/item": {
+        "/items": {
+            "get": {
+                "description": "Get all items",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Items"
+                ],
+                "summary": "Get items",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Item"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Create item",
                 "consumes": [
@@ -25,17 +55,43 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "models.Item"
+                    "Items"
                 ],
                 "summary": "Create item",
+                "parameters": [
+                    {
+                        "description": "model for create item",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httpmodels.CreateItemRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Item"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
                     }
                 }
             }
         },
-        "/item/{id}": {
+        "/items/{id}": {
             "get": {
                 "description": "Get item by id",
                 "consumes": [
@@ -45,14 +101,35 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "models.Item"
+                    "Items"
                 ],
                 "summary": "Get item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "get item by id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.Item"
+                            "$ref": "#/definitions/models.Item"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
                         }
                     }
                 }
@@ -66,12 +143,38 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "models.Item"
+                    "Items"
                 ],
                 "summary": "Update item",
+                "parameters": [
+                    {
+                        "description": "model for update item",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httpmodels.UpdateItemRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Item"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
                     }
                 }
             },
@@ -84,19 +187,40 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "models.Item"
+                    "Items"
                 ],
                 "summary": "Delete item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "delete item by id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
                     }
                 }
             }
         },
-        "/items": {
-            "get": {
-                "description": "Get all items",
+        "/users": {
+            "post": {
+                "description": "Register user",
                 "consumes": [
                     "application/json"
                 ],
@@ -104,17 +228,34 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "models.Item"
+                    "Users"
                 ],
-                "summary": "Get items",
-                "responses": {
-                    "200": {
-                        "description": "OK",
+                "summary": "Register user",
+                "parameters": [
+                    {
+                        "description": "model for create user",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/handlers.Item"
-                            }
+                            "$ref": "#/definitions/httpmodels.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
                         }
                     }
                 }
@@ -122,7 +263,61 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.Item": {
+        "apperrors.Error": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/apperrors.Type"
+                }
+            }
+        },
+        "apperrors.Type": {
+            "type": "string",
+            "enum": [
+                "BAD_REQUEST",
+                "CONFLICT",
+                "INTERNAL"
+            ],
+            "x-enum-comments": {
+                "BadRequest": "BadInput - 400",
+                "Conflict": "Already exists (eg, create account with existent email) - 409",
+                "Internal": "Server (500) and fallback apperrors - 500"
+            },
+            "x-enum-varnames": [
+                "BadRequest",
+                "Conflict",
+                "Internal"
+            ]
+        },
+        "httpmodels.CreateItemRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "number"
+                }
+            }
+        },
+        "httpmodels.CreateUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "httpmodels.UpdateItemRequest": {
             "type": "object",
             "properties": {
                 "id": {
@@ -131,8 +326,28 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "price": {
+                "owner_id": {
                     "type": "integer"
+                },
+                "price": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.Item": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "number"
                 }
             }
         }

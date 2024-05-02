@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"project-auction/config"
+	"project-auction/database"
 	"project-auction/docs"
 	"project-auction/lib/logger"
 	httpServer "project-auction/server/http"
@@ -27,12 +28,17 @@ func main() {
 
 	cfg := config.MustLoad()
 
+	db, err := database.Connect(cfg)
+	if err != nil {
+		panic(err)
+	}
+
 	log := logger.SetupLogger(cfg.LogLevel)
 	log = log.With(
 		slog.Int("port", cfg.Port),
 	)
 
-	router := httpServer.InitWebServer(log)
+	router := httpServer.InitWebServer(log, db)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Port),
