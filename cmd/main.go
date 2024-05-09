@@ -17,12 +17,16 @@ import (
 	"golang.org/x/net/context"
 )
 
-// @title  			Project-Auction API
-// @version			1.0
-// @description 	Hillel Project
-// @host 			http://swagger.io/terms/
+//	@title			Project-Auction API
+//	@version		1.0
+//	@description	Hillel Project
+//	@host			http://swagger.io/terms/
 
-// @BasePath 		/
+//	@securityDefinitions.apikey	ApiKeyAuth
+//	@in							header
+//	@name						Authorization
+
+//	@BasePath	/
 func main() {
 	docs.SwaggerInfo.Host = ""
 

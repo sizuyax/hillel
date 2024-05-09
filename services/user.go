@@ -6,7 +6,7 @@ import (
 )
 
 type UserService interface {
-	CreateUser(models.User) (models.User, error)
+	CreateUser(*models.User) (*models.User, error)
 }
 
 type userService struct {
@@ -23,11 +23,11 @@ func NewUserService(cfg USConfig) UserService {
 	}
 }
 
-func (us *userService) CreateUser(user models.User) (models.User, error) {
+func (us *userService) CreateUser(user *models.User) (*models.User, error) {
 
 	user, err := us.UserRepository.InsertUser(user)
 	if err != nil {
-		return models.User{}, err
+		return &models.User{}, err
 	}
 
 	return user, nil

@@ -1,16 +1,17 @@
 package services
 
 import (
+	"golang.org/x/net/context"
 	"project-auction/models"
 	"project-auction/repository"
 )
 
 type ItemService interface {
-	CreateItem(*models.Item) (models.Item, error)
-	GetItems() ([]models.Item, error)
-	GetItemByID(int) (models.Item, error)
-	UpdateItem(models.Item) (models.Item, error)
-	DeleteItemByID(id int) error
+	CreateItem(context.Context, *models.Item) (models.Item, error)
+	GetItems(context.Context) ([]models.Item, error)
+	GetItemByID(context.Context, int) (models.Item, error)
+	UpdateItem(context.Context, models.Item) (models.Item, error)
+	DeleteItemByID(context.Context, int) error
 }
 
 type itemService struct {
@@ -27,8 +28,8 @@ func NewItemService(cfg ISConfig) ItemService {
 	}
 }
 
-func (is *itemService) CreateItem(item *models.Item) (models.Item, error) {
-	createItem, err := is.ItemRepository.InsertItem(item)
+func (is *itemService) CreateItem(ctx context.Context, item *models.Item) (models.Item, error) {
+	createItem, err := is.ItemRepository.InsertItem(ctx, item)
 	if err != nil {
 		return models.Item{}, err
 	}
@@ -36,8 +37,8 @@ func (is *itemService) CreateItem(item *models.Item) (models.Item, error) {
 	return createItem, nil
 }
 
-func (is *itemService) GetItems() ([]models.Item, error) {
-	items, err := is.ItemRepository.SelectItems()
+func (is *itemService) GetItems(ctx context.Context) ([]models.Item, error) {
+	items, err := is.ItemRepository.SelectItems(ctx)
 	if err != nil {
 		return []models.Item{}, err
 	}
@@ -45,8 +46,8 @@ func (is *itemService) GetItems() ([]models.Item, error) {
 	return items, nil
 }
 
-func (is *itemService) GetItemByID(id int) (models.Item, error) {
-	item, err := is.ItemRepository.SelectItemByID(id)
+func (is *itemService) GetItemByID(ctx context.Context, id int) (models.Item, error) {
+	item, err := is.ItemRepository.SelectItemByID(ctx, id)
 	if err != nil {
 		return models.Item{}, err
 	}
@@ -54,8 +55,8 @@ func (is *itemService) GetItemByID(id int) (models.Item, error) {
 	return item, nil
 }
 
-func (is *itemService) UpdateItem(item models.Item) (models.Item, error) {
-	existsItem, err := is.GetItemByID(item.ID)
+func (is *itemService) UpdateItem(ctx context.Context, item models.Item) (models.Item, error) {
+	existsItem, err := is.GetItemByID(ctx, item.ID)
 	if err != nil {
 		return models.Item{}, err
 	}
@@ -72,7 +73,7 @@ func (is *itemService) UpdateItem(item models.Item) (models.Item, error) {
 		item.Price = existsItem.Price
 	}
 
-	updateItem, err := is.ItemRepository.UpdateItem(item)
+	updateItem, err := is.ItemRepository.UpdateItem(ctx, item)
 	if err != nil {
 		return models.Item{}, err
 	}
@@ -80,8 +81,8 @@ func (is *itemService) UpdateItem(item models.Item) (models.Item, error) {
 	return updateItem, nil
 }
 
-func (is *itemService) DeleteItemByID(id int) error {
-	if err := is.ItemRepository.DeleteItemByID(id); err != nil {
+func (is *itemService) DeleteItemByID(ctx context.Context, id int) error {
+	if err := is.ItemRepository.DeleteItemByID(ctx, id); err != nil {
 		return err
 	}
 

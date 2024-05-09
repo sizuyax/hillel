@@ -5,6 +5,7 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"log/slog"
 	"project-auction/services"
+	"project-auction/services/middlewares"
 )
 
 type Item struct {
@@ -14,34 +15,42 @@ type Item struct {
 }
 
 type Handler struct {
-	Log         *slog.Logger
-	UserService services.UserService
-	ItemService services.ItemService
+	Log           *slog.Logger
+	UserService   services.UserService
+	SellerService services.SellerService
+	ItemService   services.ItemService
 }
 
 type Config struct {
-	EchoRouter  *echo.Echo
-	Log         *slog.Logger
-	UserService services.UserService
-	ItemService services.ItemService
+	EchoRouter    *echo.Echo
+	Log           *slog.Logger
+	UserService   services.UserService
+	SellerService services.SellerService
+	ItemService   services.ItemService
 }
 
 func NewHandler(cfg Config) Handler {
 	h := Handler{
-		Log:         cfg.Log,
-		UserService: cfg.UserService,
-		ItemService: cfg.ItemService,
+		Log:           cfg.Log,
+		UserService:   cfg.UserService,
+		SellerService: cfg.SellerService,
+		ItemService:   cfg.ItemService,
 	}
 	return h
 }
 
 func SetupRoutes(cfg Config, handler Handler) {
+	itemGroupWithToken := cfg.EchoRouter.Group("/items", middlewares.ParseAccessToken)
+	itemGroupWithToken.POST("", handler.CreateItem)
+	itemGroupWithToken.PUT("/:id", handler.UpdateItem)
+	itemGroupWithToken.DELETE("/:id", handler.DeleteItemByID)
+
 	itemGroup := cfg.EchoRouter.Group("/items")
 	itemGroup.GET("", handler.GetItems)
 	itemGroup.GET("/:id", handler.GetItemByID)
-	itemGroup.POST("", handler.CreateItem)
-	itemGroup.PUT("/:id", handler.UpdateItem)
-	itemGroup.DELETE("/:id", handler.DeleteItemByID)
+
+	sellerGroup := cfg.EchoRouter.Group("/sellers")
+	sellerGroup.POST("", handler.RegisterSeller)
 
 	userGroup := cfg.EchoRouter.Group("/users")
 	userGroup.POST("", handler.RegisterUser)

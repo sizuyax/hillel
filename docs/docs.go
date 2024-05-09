@@ -47,6 +47,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create item",
                 "consumes": [
                     "application/json"
@@ -135,6 +140,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update item",
                 "consumes": [
                     "application/json"
@@ -179,6 +189,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete item",
                 "consumes": [
                     "application/json"
@@ -202,6 +217,49 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/sellers": {
+            "post": {
+                "description": "Create seller",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sellers"
+                ],
+                "summary": "User can become a seller",
+                "parameters": [
+                    {
+                        "description": "model for create seller",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httpmodels.CreateSellerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -277,6 +335,7 @@ const docTemplate = `{
         "apperrors.Type": {
             "type": "string",
             "enum": [
+                "AUTHORIZATION",
                 "BAD_REQUEST",
                 "CONFLICT",
                 "INTERNAL"
@@ -287,6 +346,7 @@ const docTemplate = `{
                 "Internal": "Server (500) and fallback apperrors - 500"
             },
             "x-enum-varnames": [
+                "Authorization",
                 "BadRequest",
                 "Conflict",
                 "Internal"
@@ -298,11 +358,19 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "owner_id": {
-                    "type": "integer"
-                },
                 "price": {
                     "type": "number"
+                }
+            }
+        },
+        "httpmodels.CreateSellerRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
                 }
             }
         },
@@ -326,9 +394,6 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "owner_id": {
-                    "type": "integer"
-                },
                 "price": {
                     "type": "number"
                 }
@@ -350,6 +415,13 @@ const docTemplate = `{
                     "type": "number"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

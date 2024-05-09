@@ -9,9 +9,10 @@ import (
 type Type string
 
 const (
-	BadRequest Type = "BAD_REQUEST" // BadInput - 400
-	Conflict   Type = "CONFLICT"    // Already exists (eg, create account with existent email) - 409
-	Internal   Type = "INTERNAL"    // Server (500) and fallback apperrors - 500
+	Authorization Type = "AUTHORIZATION"
+	BadRequest    Type = "BAD_REQUEST" // BadInput - 400
+	Conflict      Type = "CONFLICT"    // Already exists (eg, create account with existent email) - 409
+	Internal      Type = "INTERNAL"    // Server (500) and fallback apperrors - 500
 )
 
 type Error struct {
@@ -69,5 +70,12 @@ func NewNoRows() *Error {
 	return &Error{
 		Type:    Internal,
 		Message: "Database has no rows.",
+	}
+}
+
+func NewAuthorization(reason string) *Error {
+	return &Error{
+		Type:    Authorization,
+		Message: reason,
 	}
 }

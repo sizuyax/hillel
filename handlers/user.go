@@ -5,28 +5,27 @@ import (
 	"net/http"
 	"project-auction/apperrors"
 	"project-auction/models"
-	"project-auction/server/httpmodels"
+	"project-auction/server/http/httpmodels"
 )
 
 // RegisterUser 	godoc
-// @Summary 		Register user
-// @Description 	Register user
-// @Tags 			Users
-// @Accept  		json
-// @Produce  		json
-// @Param 			request body			httpmodels.CreateUserRequest true "model for create user"
-// @Success 		201
-// @Failure         400  {object}  			apperrors.Error
-// @Failure         500  {object}  			apperrors.Error
-// @Router 			/users 					[post]
+//
+//	@Summary		Register user
+//	@Description	Register user
+//	@Tags			Users
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	httpmodels.CreateUserRequest	true	"model for create user"
+//	@Success		201
+//	@Failure		400		{object}	apperrors.Error
+//	@Failure		500		{object}	apperrors.Error
+//	@Router			/users 											[post]
 func (h Handler) RegisterUser(c echo.Context) error {
 
 	var req httpmodels.CreateUserRequest
 
 	if err := c.Bind(&req); err != nil {
-
 		h.Log.Error("failed to parse request", err)
-
 		return c.JSON(apperrors.Status(err), apperrors.NewInternal())
 	}
 
@@ -34,7 +33,7 @@ func (h Handler) RegisterUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, apperrors.NewBadRequest("email or password is empty"))
 	}
 
-	user := models.User{
+	user := &models.User{
 		Email:    req.Email,
 		Password: req.Password,
 	}
