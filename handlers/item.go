@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/labstack/echo/v4"
+	"log/slog"
 	"net/http"
 	"project-auction/apperrors"
 	"project-auction/models"
@@ -22,18 +23,18 @@ import (
 //	@Success		201		{object}	models.Item
 //	@Failure		400		{object}	apperrors.Error
 //	@Failure		500		{object}	apperrors.Error
-//	@Router			/items										    [post]
+//	@Router			/items														    [post]
 func (h Handler) CreateItem(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
-		h.Log.Error("failed get context from echo context", err)
+		h.log.Error("failed get context from echo context", slog.String("error", err.Error()))
 		return c.JSON(http.StatusInternalServerError, apperrors.NewInternal())
 	}
 
 	var req httpmodels.CreateItemRequest
 
 	if err := c.Bind(&req); err != nil {
-		h.Log.ErrorContext(ctx, "failed to parse request", err)
+		h.log.ErrorContext(ctx, "failed to parse request", slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), apperrors.NewBadRequest("incorrect body request"))
 	}
 
@@ -43,9 +44,9 @@ func (h Handler) CreateItem(c echo.Context) error {
 		Price:   req.Price,
 	}
 
-	createItem, err := h.ItemService.CreateItem(ctx, item)
+	createItem, err := h.itemService.CreateItem(ctx, item)
 	if err != nil {
-		h.Log.ErrorContext(ctx, "failed to create item", err)
+		h.log.ErrorContext(ctx, "failed to create item", slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), err)
 	}
 
@@ -68,17 +69,17 @@ func (h Handler) CreateItem(c echo.Context) error {
 //	@Produce		json
 //	@Success		200		{object}	[]models.Item
 //	@Failure		500		{object}	apperrors.Error
-//	@Router			/items 										[get]
+//	@Router			/items 														[get]
 func (h Handler) GetItems(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
-		h.Log.Error("failed get context from echo context", err)
+		h.log.Error("failed get context from echo context", slog.String("error", err.Error()))
 		return c.JSON(http.StatusInternalServerError, apperrors.NewInternal())
 	}
 
-	itemsArray, err := h.ItemService.GetItems(ctx)
+	itemsArray, err := h.itemService.GetItems(ctx)
 	if err != nil {
-		h.Log.ErrorContext(ctx, "failed to get items", err)
+		h.log.ErrorContext(ctx, "failed to get items", slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), err)
 	}
 
@@ -109,24 +110,24 @@ func (h Handler) GetItems(c echo.Context) error {
 //	@Success		200				{object}	models.Item
 //	@Failure		400				{object}	apperrors.Error
 //	@Failure		500				{object}	apperrors.Error
-//	@Router			/items/{id} 									[get]
+//	@Router			/items/{id} 													[get]
 func (h Handler) GetItemByID(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
-		h.Log.Error("failed get context from echo context", err)
+		h.log.Error("failed get context from echo context", slog.String("error", err.Error()))
 		return c.JSON(http.StatusInternalServerError, apperrors.NewInternal())
 	}
 
 	id := c.Param("id")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		h.Log.ErrorContext(ctx, "failed to parse id", err)
+		h.log.ErrorContext(ctx, "failed to parse id", slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), apperrors.NewBadRequest("id must be integer."))
 	}
 
-	item, err := h.ItemService.GetItemByID(ctx, idInt)
+	item, err := h.itemService.GetItemByID(ctx, idInt)
 	if err != nil {
-		h.Log.ErrorContext(ctx, "failed to get item by id with id", idInt, "error", err)
+		h.log.ErrorContext(ctx, "failed to get item by id with id", slog.Int("id", idInt), "error", err)
 		return c.JSON(apperrors.Status(err), err)
 	}
 
@@ -152,23 +153,24 @@ func (h Handler) GetItemByID(c echo.Context) error {
 //	@Success		200				{object}	models.Item
 //	@Failure		400				{object}	apperrors.Error
 //	@Failure		500				{object}	apperrors.Error
-//	@Router			/items/{id} 									[put]
+//	@Router			/items/{id} 													[put]
 func (h Handler) UpdateItem(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
-		h.Log.Error("failed get context from echo context", err)
+		h.log.Error("failed get context from echo context", slog.String("error", err.Error()))
 		return c.JSON(http.StatusInternalServerError, apperrors.NewInternal())
 	}
 
 	var req httpmodels.UpdateItemRequest
 
 	if err := c.Bind(&req); err != nil {
-		h.Log.ErrorContext(ctx, "failed to parse request", err)
+		h.log.ErrorContext(ctx, "failed to parse request", slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), apperrors.NewInternal())
 	}
 
-	if req.ID == 0 {
-		return c.JSON(http.StatusBadRequest, apperrors.NewBadRequest("id is require."))
+	if err := req.Validate(); err != nil {
+		h.log.ErrorContext(ctx, "validation failed", slog.String("error", err.Error()))
+		return c.JSON(apperrors.Status(err), err)
 	}
 
 	item := models.Item{
@@ -178,9 +180,9 @@ func (h Handler) UpdateItem(c echo.Context) error {
 		Price:   req.Price,
 	}
 
-	updateItem, err := h.ItemService.UpdateItem(ctx, item)
+	updateItem, err := h.itemService.UpdateItem(ctx, item)
 	if err != nil {
-		h.Log.ErrorContext(ctx, "failed to update item", err)
+		h.log.ErrorContext(ctx, "failed to update item", slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), err)
 	}
 
@@ -206,23 +208,23 @@ func (h Handler) UpdateItem(c echo.Context) error {
 //	@Success		200
 //	@Failure		400				{object}	apperrors.Error
 //	@Failure		500				{object}	apperrors.Error
-//	@Router			/items/{id} 									[delete]
+//	@Router			/items/{id} 													[delete]
 func (h Handler) DeleteItemByID(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
-		h.Log.Error("failed get context from echo context", err)
+		h.log.Error("failed get context from echo context", slog.String("error", err.Error()))
 		return c.JSON(http.StatusInternalServerError, apperrors.NewInternal())
 	}
 
 	id := c.Param("id")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		h.Log.ErrorContext(ctx, "failed to parse id", err)
+		h.log.ErrorContext(ctx, "failed to parse id", slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), apperrors.NewBadRequest("id must be integer."))
 	}
 
-	if err := h.ItemService.DeleteItemByID(ctx, idInt); err != nil {
-		h.Log.ErrorContext(ctx, "failed to delete item with id", idInt, "error", err)
+	if err := h.itemService.DeleteItemByID(ctx, idInt); err != nil {
+		h.log.ErrorContext(ctx, "failed to delete item with id", slog.Int("id", idInt), "error", err)
 		return c.JSON(apperrors.Status(err), err)
 	}
 

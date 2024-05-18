@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/labstack/echo/v4"
+	"log/slog"
 	"net/http"
 	"project-auction/apperrors"
 	"project-auction/models"
@@ -19,13 +20,12 @@ import (
 //	@Success		201
 //	@Failure		400		{object}	apperrors.Error
 //	@Failure		500		{object}	apperrors.Error
-//	@Router			/users 											[post]
+//	@Router			/users 															[post]
 func (h Handler) RegisterUser(c echo.Context) error {
-
 	var req httpmodels.CreateUserRequest
 
 	if err := c.Bind(&req); err != nil {
-		h.Log.Error("failed to parse request", err)
+		h.log.Error("failed to parse request", slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), apperrors.NewInternal())
 	}
 
@@ -38,8 +38,9 @@ func (h Handler) RegisterUser(c echo.Context) error {
 		Password: req.Password,
 	}
 
-	userRes, err := h.UserService.CreateUser(user)
+	userRes, err := h.userService.CreateUser(user)
 	if err != nil {
+		h.log.Error("failed to create user", slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), err)
 	}
 

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/labstack/echo/v4"
+	"log/slog"
 	"net/http"
 	"project-auction/apperrors"
 	"project-auction/models"
@@ -20,17 +21,18 @@ import (
 //	@Success		201
 //	@Failure		400			{object}	apperrors.Error
 //	@Failure		500			{object}	apperrors.Error
-//	@Router			/sellers 										[post]
+//	@Router			/sellers 														[post]
 func (h Handler) RegisterSeller(c echo.Context) error {
 	var req httpmodels.CreateSellerRequest
 
 	if err := c.Bind(&req); err != nil {
-		h.Log.Error("failed to parse request", err)
+		h.log.Error("failed to parse request", slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), apperrors.NewInternal())
 	}
 
-	if req.Email == "" || req.Password == "" {
-		return c.JSON(http.StatusBadRequest, apperrors.NewBadRequest("email or password is empty"))
+	if err := req.Validate(); err != nil {
+		h.log.Error("validations failed", slog.String("error", err.Error()))
+		return c.JSON(apperrors.Status(err), err)
 	}
 
 	seller := &models.Seller{
@@ -38,17 +40,20 @@ func (h Handler) RegisterSeller(c echo.Context) error {
 		Password: req.Password,
 	}
 
-	sellerRes, err := h.SellerService.CreateSeller(seller)
+	sellerRes, err := h.sellerService.CreateSeller(seller)
 	if err != nil {
+		h.log.Error("failed to create seller", slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), err)
 	}
 
-	accessToken, err := services.GenerateJWTAccessToken(sellerRes.ID)
+	jwtPairs, err := services.GenerateJWTPairTokens(sellerRes.ID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, apperrors.NewInternal())
+		h.log.Error("failed to generate jwt pair tokens", slog.String("error", err.Error()))
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusCreated, httpmodels.CreateSellerResponse{
-		AccessToken: accessToken,
+		AccessToken:  jwtPairs.AccessToken,
+		RefreshToken: jwtPairs.RefreshToken,
 	})
 }

@@ -6,18 +6,18 @@ import (
 	"net/http"
 )
 
-type Type string
+type ErrorType string
 
 const (
-	Authorization Type = "AUTHORIZATION"
-	BadRequest    Type = "BAD_REQUEST" // BadInput - 400
-	Conflict      Type = "CONFLICT"    // Already exists (eg, create account with existent email) - 409
-	Internal      Type = "INTERNAL"    // Server (500) and fallback apperrors - 500
+	Authorization ErrorType = "AUTHORIZATION"
+	BadRequest    ErrorType = "BAD_REQUEST" // BadInput - 400
+	Conflict      ErrorType = "CONFLICT"    // Already exists (eg, create account with existent email) - 409
+	Internal      ErrorType = "INTERNAL"    // Server (500) and fallback apperrors - 500
 )
 
 type Error struct {
-	Type    Type   `json:"type"`
-	Message string `json:"message"`
+	Type    ErrorType `json:"type"`
+	Message string    `json:"message"`
 }
 
 func (e *Error) Error() string {

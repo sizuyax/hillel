@@ -15,10 +15,10 @@ type Item struct {
 }
 
 type Handler struct {
-	Log           *slog.Logger
-	UserService   services.UserService
-	SellerService services.SellerService
-	ItemService   services.ItemService
+	log           *slog.Logger
+	userService   services.UserService
+	sellerService services.SellerService
+	itemService   services.ItemService
 }
 
 type Config struct {
@@ -31,10 +31,10 @@ type Config struct {
 
 func NewHandler(cfg Config) Handler {
 	h := Handler{
-		Log:           cfg.Log,
-		UserService:   cfg.UserService,
-		SellerService: cfg.SellerService,
-		ItemService:   cfg.ItemService,
+		log:           cfg.Log,
+		userService:   cfg.UserService,
+		sellerService: cfg.SellerService,
+		itemService:   cfg.ItemService,
 	}
 	return h
 }
@@ -54,6 +54,9 @@ func SetupRoutes(cfg Config, handler Handler) {
 
 	userGroup := cfg.EchoRouter.Group("/users")
 	userGroup.POST("", handler.RegisterUser)
+
+	authGroup := cfg.EchoRouter.Group("/auth")
+	authGroup.POST("/tokens", handler.RefreshTokens)
 
 	cfg.EchoRouter.GET("/swagger/*", echoSwagger.WrapHandler)
 }

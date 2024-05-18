@@ -44,6 +44,18 @@ definitions:
       password:
         type: string
     type: object
+  httpmodels.RefreshTokensRequest:
+    properties:
+      refreshToken:
+        type: string
+    type: object
+  httpmodels.RefreshTokensResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    type: object
   httpmodels.UpdateItemRequest:
     properties:
       id:
@@ -71,6 +83,36 @@ info:
   title: Project-Auction API
   version: "1.0"
 paths:
+  /auth/tokens:
+    post:
+      consumes:
+      - application/json
+      description: Refresh access token
+      parameters:
+      - description: model for refresh access token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/httpmodels.RefreshTokensRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httpmodels.RefreshTokensResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Refresh access token
+      tags:
+      - Tokens
   /items:
     get:
       consumes:
