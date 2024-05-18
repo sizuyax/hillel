@@ -9,14 +9,16 @@ import (
 	"strconv"
 )
 
+const port = "8081"
+
 func HttpServer() {
 	http.Handle("/", http.HandlerFunc(handle))
 
-	logrus.Println("Server is listening on port 8081 HTTP Server")
-
-	if err := http.ListenAndServe(":8081", nil); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
 		logrus.Fatal(err)
 	}
+
+	logrus.Printf("server is listening on port %s HTTP Server", port)
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
