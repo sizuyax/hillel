@@ -1,0 +1,275 @@
+basePath: /
+definitions:
+  apperrors.Error:
+    properties:
+      message:
+        type: string
+      type:
+        $ref: '#/definitions/apperrors.Type'
+    type: object
+  apperrors.Type:
+    enum:
+    - AUTHORIZATION
+    - BAD_REQUEST
+    - CONFLICT
+    - INTERNAL
+    type: string
+    x-enum-comments:
+      BadRequest: BadInput - 400
+      Conflict: Already exists (eg, create account with existent email) - 409
+      Internal: Server (500) and fallback apperrors - 500
+    x-enum-varnames:
+    - Authorization
+    - BadRequest
+    - Conflict
+    - Internal
+  httpmodels.CreateItemRequest:
+    properties:
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  httpmodels.CreateSellerRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  httpmodels.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  httpmodels.UpdateItemRequest:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  models.Item:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      owner_id:
+        type: integer
+      price:
+        type: number
+    type: object
+host: http://swagger.io/terms/
+info:
+  contact: {}
+  description: Hillel Project
+  title: Project-Auction API
+  version: "1.0"
+paths:
+  /items:
+    get:
+      consumes:
+      - application/json
+      description: Get all items
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Item'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Get items
+      tags:
+      - Items
+    post:
+      consumes:
+      - application/json
+      description: Create item
+      parameters:
+      - description: model for create item
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/httpmodels.CreateItemRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Item'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Create item
+      tags:
+      - Items
+  /items/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete item
+      parameters:
+      - description: delete item by id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete item
+      tags:
+      - Items
+    get:
+      consumes:
+      - application/json
+      description: Get item by id
+      parameters:
+      - description: get item by id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Item'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Get item
+      tags:
+      - Items
+    put:
+      consumes:
+      - application/json
+      description: Update item
+      parameters:
+      - description: model for update item
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/httpmodels.UpdateItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Item'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Update item
+      tags:
+      - Items
+  /sellers:
+    post:
+      consumes:
+      - application/json
+      description: Create seller
+      parameters:
+      - description: model for create seller
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/httpmodels.CreateSellerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: User can become a seller
+      tags:
+      - Sellers
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Register user
+      parameters:
+      - description: model for create user
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/httpmodels.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Register user
+      tags:
+      - Users
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
