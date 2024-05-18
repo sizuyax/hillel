@@ -1,8 +1,8 @@
 package models
 
-type SellString string
+type SellerKey string
 
-const SellerIDKey SellString = "seller_id"
+const SellerIDKey SellerKey = "seller_id"
 
 type Seller struct {
 	ID       int    `json:"id"`

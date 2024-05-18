@@ -127,7 +127,7 @@ func (h Handler) GetItemByID(c echo.Context) error {
 
 	item, err := h.itemService.GetItemByID(ctx, idInt)
 	if err != nil {
-		h.log.ErrorContext(ctx, "failed to get item by id with id", slog.Int("id", idInt), "error", err)
+		h.log.ErrorContext(ctx, "failed to get item by id with id", slog.Int("id", idInt), slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), err)
 	}
 
@@ -224,7 +224,7 @@ func (h Handler) DeleteItemByID(c echo.Context) error {
 	}
 
 	if err := h.itemService.DeleteItemByID(ctx, idInt); err != nil {
-		h.log.ErrorContext(ctx, "failed to delete item with id", slog.Int("id", idInt), "error", err)
+		h.log.ErrorContext(ctx, "failed to delete item with id", slog.Int("id", idInt), slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), err)
 	}
 
