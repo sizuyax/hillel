@@ -7,11 +7,11 @@ docker-run:
 docker-build-run: docker-build
 	docker run -p $(port) project-auction
 
-swag-init:
-	swag init -g cmd/main.go
-
 swag-fmt:
 	swag fmt
+
+swag-init swag-fmt:
+	swag init -g cmd/main.go
 
 goose-path:
 	export GOOSE_MIGRATION_DIR=migrations
@@ -24,6 +24,9 @@ goose-up:
 
 goose-down:
 	goose postgres "postgres://test:test@localhost:5432/test" down
+
+lint:
+	golangci-lint run
 
 run:
 	go run cmd/main.go

@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"project-auction/config"
-	"project-auction/database"
 	"project-auction/docs"
-	"project-auction/lib/logger"
-	httpServer "project-auction/server/http"
+	"project-auction/internal/adapters/database/postgres"
+	"project-auction/internal/app"
+	"project-auction/internal/config"
+	"project-auction/internal/lib/logger"
 	"syscall"
 	"time"
 
@@ -26,13 +26,13 @@ import (
 //	@in							header
 //	@name						Authorization
 
-//	@BasePath	/
+// @BasePath	/
 func main() {
 	docs.SwaggerInfo.Host = ""
 
 	cfg := config.MustLoad()
 
-	db, err := database.Connect(cfg)
+	db, err := postgres.Connect(cfg)
 	if err != nil {
 		panic(err)
 	}
@@ -42,7 +42,7 @@ func main() {
 		slog.Int("port", cfg.Port),
 	)
 
-	router := httpServer.InitWebServer(log, db)
+	router := app.InitWebServer(log, db)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Port),
