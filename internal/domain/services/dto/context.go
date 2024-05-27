@@ -1,8 +1,9 @@
-package servicesmodels
+package dto
 
 import "github.com/labstack/echo/v4"
 
 type CustomContext struct {
 	echo.Context
-	SellerID int
+	ProfileID   int
+	ProfileType string
 }

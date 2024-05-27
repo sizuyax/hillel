@@ -7,9 +7,10 @@ import (
 )
 
 func TestGenerateJWTAccessToken(t *testing.T) {
-	sellerID := 1
+	profileID := 1
+	profileType := "seller"
 
-	accessToken, err := GenerateJWTAccessToken(sellerID)
+	accessToken, err := GenerateJWTAccessToken(profileID, profileType)
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, accessToken)
@@ -18,20 +19,22 @@ func TestGenerateJWTAccessToken(t *testing.T) {
 }
 
 func TestParseJWTAccessToken(t *testing.T) {
-	accessToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTYyOTc5MDYsInNlbGxlcklEIjoxfQ.mbD_3q13p3Qw7vwF_CatfDWl61ru0x-iJnRA9bw3VH8"
+	accessToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTY4NTg3NDMsInByb2ZpbGVJRCI6MSwicHJvZmlsZVR5cGUiOiJzZWxsZXIifQ.x7NnP88AnaYf5cwfsn28mVcNsKRDHCYim1YucCnFe6A"
 
-	sellerID, err := ParseJWTAccessToken(accessToken)
+	profileID, profileType, err := ParseJWTAccessToken(accessToken)
 
 	assert.NoError(t, err)
-	assert.Equal(t, 1, sellerID)
+	assert.Equal(t, 1, profileID)
 
-	fmt.Println(sellerID, "---> error: ", err)
+	fmt.Println(profileID)
+	fmt.Println(profileType, "---> error: ", err)
 }
 
 func TestGenerateJWTRefreshToken(t *testing.T) {
-	sellerID := 1
+	profileID := 1
+	profileType := "seller"
 
-	refreshToken, err := GenerateJWTRefreshToken(sellerID)
+	refreshToken, err := GenerateJWTRefreshToken(profileID, profileType)
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, refreshToken)
@@ -52,9 +55,10 @@ func TestRefreshAccessJWTToken(t *testing.T) {
 }
 
 func TestGenerateJWTPairTokens(t *testing.T) {
-	sellerID := 1
+	profileID := 1
+	profileType := "seller"
 
-	jwtPair, err := GenerateJWTPairTokens(sellerID)
+	jwtPair, err := GenerateJWTPairTokens(profileID, profileType)
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, jwtPair)

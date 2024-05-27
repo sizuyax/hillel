@@ -3,7 +3,7 @@ package services
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"project-auction/internal/adapters/repository/postgres/mocks"
+	"project-auction/internal/adapters/postgres/repository/mocks"
 	"project-auction/internal/domain/entity"
 	"testing"
 )
@@ -14,12 +14,12 @@ func TestInsertUser(t *testing.T) {
 		UserRepository: mockRepo,
 	}
 
-	inputUser := &entity.User{
+	inputUser := entity.User{
 		Email:    "test@test.com",
 		Password: "test",
 	}
 
-	expectedUser := &entity.User{
+	expectedUser := entity.User{
 		ID:       1,
 		Email:    "test@test.com",
 		Password: "test",

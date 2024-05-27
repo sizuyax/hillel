@@ -7,6 +7,7 @@ import (
 	"project-auction/internal/common/apperrors"
 	"project-auction/internal/controller/http/v1/dto"
 	"project-auction/internal/domain/entity"
+	"project-auction/internal/domain/services"
 )
 
 // RegisterUser 	godoc
@@ -16,11 +17,11 @@ import (
 //	@Tags			Users
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body	httpmodels.CreateUserRequest	true	"model for create user"
+//	@Param			request	body	dto.CreateUserRequest	true	"model for create user"
 //	@Success		201
 //	@Failure		400		{object}	apperrors.Error
 //	@Failure		500		{object}	apperrors.Error
-//	@Router			/users 															[post]
+//	@Router			/users 																																					[post]
 func (h Handler) RegisterUser(c echo.Context) error {
 	var req dto.CreateUserRequest
 
@@ -33,9 +34,10 @@ func (h Handler) RegisterUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, apperrors.NewBadRequest("email or password is empty"))
 	}
 
-	user := &entity.User{
+	user := entity.User{
 		Email:    req.Email,
 		Password: req.Password,
+		Type:     "user",
 	}
 
 	userRes, err := h.userService.CreateUser(user)
@@ -44,11 +46,14 @@ func (h Handler) RegisterUser(c echo.Context) error {
 		return c.JSON(apperrors.Status(err), err)
 	}
 
-	return c.JSON(http.StatusCreated, dto.CreateUserResponse{
-		ID: userRes.ID,
-		BaseUser: dto.BaseUser{
-			Email:    userRes.Email,
-			Password: userRes.Password,
-		},
+	jwtPair, err := services.GenerateJWTPairTokens(userRes.ID, userRes.Type)
+	if err != nil {
+		h.log.Error("failed to generate jwt pair tokens", slog.String("error", err.Error()))
+		return apperrors.NewInternal()
+	}
+
+	return c.JSON(http.StatusCreated, entity.PairJWTClaims{
+		AccessToken:  jwtPair.AccessToken,
+		RefreshToken: jwtPair.RefreshToken,
 	})
 }

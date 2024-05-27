@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"database/sql"
+	"errors"
 	"github.com/labstack/echo/v4"
 	"log/slog"
 	"net/http"
@@ -19,11 +21,13 @@ import (
 //	@Security		ApiKeyAuth
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body		httpmodels.CreateItemRequest	true	"model for create item"
+//	@Param			request	body		dto.CreateItemRequest	true	"model for create item"
 //	@Success		201		{object}	entity.Item
 //	@Failure		400		{object}	apperrors.Error
 //	@Failure		500		{object}	apperrors.Error
-//	@Router			/items														    [post]
+//	@Failure		422		{object}	apperrors.Error
+//	@Failure		409		{object}	apperrors.Error
+//	@Router			/items																																				    [post]
 func (h Handler) CreateItem(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
@@ -39,7 +43,7 @@ func (h Handler) CreateItem(c echo.Context) error {
 
 	item := entity.Item{
 		Name:    req.Name,
-		OwnerID: ctx.Value(entity.SellerIDKey).(int),
+		OwnerID: ctx.Value(entity.ProfileIDKey).(int),
 		Price:   req.Price,
 	}
 
@@ -66,7 +70,8 @@ func (h Handler) CreateItem(c echo.Context) error {
 //	@Produce		json
 //	@Success		200		{object}	[]entity.Item
 //	@Failure		500		{object}	apperrors.Error
-//	@Router			/items 														[get]
+//	@Failure		404		{object}	apperrors.Error
+//	@Router			/items 																																				[get]
 func (h Handler) GetItems(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
@@ -77,6 +82,9 @@ func (h Handler) GetItems(c echo.Context) error {
 	itemsArray, err := h.itemService.GetItems(ctx)
 	if err != nil {
 		h.log.ErrorContext(ctx, "failed to get items", slog.String("error", err.Error()))
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(apperrors.Status(err), apperrors.NewNoRows())
+		}
 		return c.JSON(apperrors.Status(err), err)
 	}
 
@@ -105,7 +113,7 @@ func (h Handler) GetItems(c echo.Context) error {
 //	@Success		200				{object}	entity.Item
 //	@Failure		400				{object}	apperrors.Error
 //	@Failure		500				{object}	apperrors.Error
-//	@Router			/items/{id} 													[get]
+//	@Router			/items/{id} 																																			[get]
 func (h Handler) GetItemByID(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
@@ -117,12 +125,15 @@ func (h Handler) GetItemByID(c echo.Context) error {
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		h.log.ErrorContext(ctx, "failed to parse id", slog.String("error", err.Error()))
-		return c.JSON(apperrors.Status(err), apperrors.NewBadRequest("id must be integer."))
+		return c.JSON(http.StatusBadRequest, apperrors.NewBadRequest("id must be integer."))
 	}
 
 	item, err := h.itemService.GetItemByID(ctx, idInt)
 	if err != nil {
 		h.log.ErrorContext(ctx, "failed to get item by id with id", slog.Int("id", idInt), slog.String("error", err.Error()))
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(apperrors.Status(err), apperrors.NewNoRows())
+		}
 		return c.JSON(apperrors.Status(err), err)
 	}
 
@@ -142,11 +153,11 @@ func (h Handler) GetItemByID(c echo.Context) error {
 //	@Security		ApiKeyAuth
 //	@Accept			json
 //	@Produce		json
-//	@Param			request			body		httpmodels.UpdateItemRequest	true	"model for update item"
+//	@Param			request			body		dto.UpdateItemRequest	true	"model for update item"
 //	@Success		200				{object}	entity.Item
 //	@Failure		400				{object}	apperrors.Error
 //	@Failure		500				{object}	apperrors.Error
-//	@Router			/items/{id} 													[put]
+//	@Router			/items/{id} 																																			[put]
 func (h Handler) UpdateItem(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
@@ -169,13 +180,16 @@ func (h Handler) UpdateItem(c echo.Context) error {
 	item := entity.Item{
 		ID:      req.ID,
 		Name:    req.Name,
-		OwnerID: ctx.Value(entity.SellerIDKey).(int),
+		OwnerID: ctx.Value(entity.ProfileIDKey).(int),
 		Price:   req.Price,
 	}
 
 	updateItem, err := h.itemService.UpdateItem(ctx, item)
 	if err != nil {
 		h.log.ErrorContext(ctx, "failed to update item", slog.String("error", err.Error()))
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(apperrors.Status(err), apperrors.NewNoRows())
+		}
 		return c.JSON(apperrors.Status(err), err)
 	}
 
@@ -199,7 +213,7 @@ func (h Handler) UpdateItem(c echo.Context) error {
 //	@Success		200
 //	@Failure		400				{object}	apperrors.Error
 //	@Failure		500				{object}	apperrors.Error
-//	@Router			/items/{id} 													[delete]
+//	@Router			/items/{id} 																																			[delete]
 func (h Handler) DeleteItemByID(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
@@ -216,6 +230,9 @@ func (h Handler) DeleteItemByID(c echo.Context) error {
 
 	if err := h.itemService.DeleteItemByID(ctx, idInt); err != nil {
 		h.log.ErrorContext(ctx, "failed to delete item with id", slog.Int("id", idInt), slog.String("error", err.Error()))
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(apperrors.Status(err), apperrors.NewNoRows())
+		}
 		return c.JSON(apperrors.Status(err), err)
 	}
 

@@ -4,19 +4,20 @@ import (
 	"context"
 	"github.com/labstack/echo/v4"
 	"project-auction/internal/domain/entity"
-	"project-auction/internal/domain/services/servicesmodels"
+	"project-auction/internal/domain/services/dto"
 )
 
 func NewContextFromEchoContext(c echo.Context) (context.Context, error) {
-	var customCtx *servicesmodels.CustomContext
-	if ctx, ok := c.(*servicesmodels.CustomContext); ok {
+	var customCtx *dto.CustomContext
+	if ctx, ok := c.(*dto.CustomContext); ok {
 		customCtx = ctx
 	} else {
-		cc := &servicesmodels.CustomContext{Context: c}
+		cc := &dto.CustomContext{Context: c}
 		customCtx = cc
 	}
 
-	ctx := context.WithValue(context.Background(), entity.SellerIDKey, customCtx.SellerID)
+	ctx := context.WithValue(context.Background(), entity.ProfileIDKey, customCtx.ProfileID)
+	ctx = context.WithValue(ctx, entity.ProfileTypeKey, customCtx.ProfileType)
 
 	return ctx, nil
 }

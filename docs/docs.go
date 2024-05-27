@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/httpmodels.RefreshTokensRequest"
+                            "$ref": "#/definitions/dto.RefreshTokensRequest"
                         }
                     }
                 ],
@@ -43,7 +43,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/httpmodels.RefreshTokensResponse"
+                            "$ref": "#/definitions/entity.PairJWTClaims"
                         }
                     },
                     "400": {
@@ -84,6 +84,12 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -116,7 +122,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/httpmodels.CreateItemRequest"
+                            "$ref": "#/definitions/dto.CreateItemRequest"
                         }
                     }
                 ],
@@ -129,6 +135,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/apperrors.Error"
                         }
@@ -209,7 +227,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/httpmodels.UpdateItemRequest"
+                            "$ref": "#/definitions/dto.UpdateItemRequest"
                         }
                     }
                 ],
@@ -279,6 +297,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/items/{id}/comments": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Comment item",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Comment item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "comment item with id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "model for create comment",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateCommentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.Comment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/sellers": {
             "post": {
                 "description": "Create seller",
@@ -299,7 +375,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/httpmodels.CreateSellerRequest"
+                            "$ref": "#/definitions/dto.CreateSellerRequest"
                         }
                     }
                 ],
@@ -342,7 +418,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/httpmodels.CreateUserRequest"
+                            "$ref": "#/definitions/dto.CreateUserRequest"
                         }
                     }
                 ],
@@ -374,31 +450,46 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/apperrors.Type"
+                    "$ref": "#/definitions/apperrors.ErrorType"
                 }
             }
         },
-        "apperrors.Type": {
+        "apperrors.ErrorType": {
             "type": "string",
             "enum": [
                 "AUTHORIZATION",
                 "BAD_REQUEST",
                 "CONFLICT",
-                "INTERNAL"
+                "INTERNAL",
+                "NO_ROWS",
+                "UNPROCESSABLE"
             ],
             "x-enum-comments": {
+                "Authorization": "401 UnAuthorize",
                 "BadRequest": "BadInput - 400",
                 "Conflict": "Already exists (eg, create account with existent email) - 409",
-                "Internal": "Server (500) and fallback apperrors - 500"
+                "Internal": "Server (500) and fallback apperrors - 500",
+                "NoRows": "404 Not Found",
+                "Unprocessable": "422 Unprocessable Entity"
             },
             "x-enum-varnames": [
                 "Authorization",
                 "BadRequest",
                 "Conflict",
-                "Internal"
+                "Internal",
+                "NoRows",
+                "Unprocessable"
             ]
         },
-        "httpmodels.CreateItemRequest": {
+        "dto.CreateCommentRequest": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreateItemRequest": {
             "type": "object",
             "properties": {
                 "name": {
@@ -409,7 +500,7 @@ const docTemplate = `{
                 }
             }
         },
-        "httpmodels.CreateSellerRequest": {
+        "dto.CreateSellerRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -420,7 +511,7 @@ const docTemplate = `{
                 }
             }
         },
-        "httpmodels.CreateUserRequest": {
+        "dto.CreateUserRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -431,7 +522,7 @@ const docTemplate = `{
                 }
             }
         },
-        "httpmodels.RefreshTokensRequest": {
+        "dto.RefreshTokensRequest": {
             "type": "object",
             "properties": {
                 "refreshToken": {
@@ -439,18 +530,7 @@ const docTemplate = `{
                 }
             }
         },
-        "httpmodels.RefreshTokensResponse": {
-            "type": "object",
-            "properties": {
-                "accessToken": {
-                    "type": "string"
-                },
-                "refreshToken": {
-                    "type": "string"
-                }
-            }
-        },
-        "httpmodels.UpdateItemRequest": {
+        "dto.UpdateItemRequest": {
             "type": "object",
             "properties": {
                 "id": {
@@ -461,6 +541,23 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "number"
+                }
+            }
+        },
+        "entity.Comment": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "item_id": {
+                    "type": "integer"
+                },
+                "owner_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -478,6 +575,17 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "number"
+                }
+            }
+        },
+        "entity.PairJWTClaims": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "type": "string"
+                },
+                "refreshToken": {
+                    "type": "string"
                 }
             }
         }
