@@ -5,6 +5,8 @@ import (
 	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
+	"log/slog"
+	"project-auction/internal/adapters/postgres/adaperrors"
 	"project-auction/internal/common/apperrors"
 	"project-auction/internal/domain/entity"
 )
@@ -19,11 +21,13 @@ type PGItemRepository interface {
 }
 
 type pgItemRepository struct {
+	log      *slog.Logger
 	database *sqlx.DB
 }
 
-func NewItemRepository(db *sqlx.DB) PGItemRepository {
+func NewItemRepository(log *slog.Logger, db *sqlx.DB) PGItemRepository {
 	return &pgItemRepository{
+		log:      log,
 		database: db,
 	}
 }
@@ -36,12 +40,15 @@ func (ir *pgItemRepository) InsertItem(ctx context.Context, item entity.Item) (e
 	`
 
 	if err := ir.database.QueryRowxContext(ctx, q, item.OwnerID, item.Name, item.Price).Scan(&item.ID); err != nil {
+		ir.log.Error("failed to execute request to db", slog.String("error", err.Error()))
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) {
-			if pqErr.Code == "23505" {
+			if pqErr.Code == adaperrors.UniqueViolation {
+				ir.log.Error("failed to execute request to db", slog.String("error", "unique violation"))
 				return entity.Item{}, apperrors.NewConflict("name", item.Name)
 			}
-			if pqErr.Code == "23503" {
+			if pqErr.Code == adaperrors.ForeignKeyViolation {
+				ir.log.Error("failed to execute request to db", slog.String("error", "foreign key violation"))
 				return entity.Item{}, apperrors.NewUnprocessable()
 			}
 		}
@@ -59,6 +66,7 @@ func (ir *pgItemRepository) SelectItems(ctx context.Context) ([]entity.Item, err
 	var itemArray []entity.Item
 	rows, err := ir.database.QueryxContext(ctx, q)
 	if err != nil {
+		ir.log.Error("failed to execute request to db", slog.String("error", err.Error()))
 		return []entity.Item{}, err
 	}
 	defer rows.Close()
@@ -66,17 +74,15 @@ func (ir *pgItemRepository) SelectItems(ctx context.Context) ([]entity.Item, err
 	for rows.Next() {
 		var item entity.Item
 		if err := rows.Scan(&item.ID, &item.OwnerID, &item.Name, &item.Price); err != nil {
+			ir.log.Error("failed to scan db", slog.String("error", err.Error()))
 			return []entity.Item{}, err
 		}
 
 		itemArray = append(itemArray, item)
 	}
 
-	if err := rows.Err(); err != nil {
-		return []entity.Item{}, err
-	}
-
 	if len(itemArray) == 0 {
+		ir.log.Error("db has no rows")
 		return []entity.Item{}, apperrors.NewNoRows()
 	}
 
@@ -91,6 +97,7 @@ func (ir *pgItemRepository) SelectItemByID(ctx context.Context, id int) (entity.
 
 	var item entity.Item
 	if err := ir.database.QueryRowxContext(ctx, q, id).Scan(&item.ID, &item.OwnerID, &item.Name, &item.Price); err != nil {
+		ir.log.Error("failed to execute request to db", slog.String("error", err.Error()))
 		return entity.Item{}, err
 	}
 
@@ -107,6 +114,7 @@ func (ir *pgItemRepository) UpdateItem(ctx context.Context, item entity.Item) (e
 
 	var updateItem entity.Item
 	if err := ir.database.QueryRowxContext(ctx, q, item.OwnerID, item.Name, item.Price, item.ID).Scan(&updateItem.ID, &updateItem.OwnerID, &updateItem.Name, &updateItem.Price); err != nil {
+		ir.log.Error("failed to execute request to db", slog.String("error", err.Error()))
 		return entity.Item{}, err
 	}
 
@@ -121,6 +129,7 @@ func (ir *pgItemRepository) DeleteItemByID(ctx context.Context, id int) error {
 
 	res, err := ir.database.ExecContext(ctx, q, id)
 	if err != nil {
+		ir.log.Error("failed to execute request to db", slog.String("error", err.Error()))
 		return err
 	}
 
@@ -130,6 +139,7 @@ func (ir *pgItemRepository) DeleteItemByID(ctx context.Context, id int) error {
 	}
 
 	if rowsAffected == 0 {
+		ir.log.Error("db has no rows")
 		return apperrors.NewNoRows()
 	}
 

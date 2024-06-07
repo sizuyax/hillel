@@ -4,6 +4,8 @@ import (
 	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
+	"log/slog"
+	"project-auction/internal/adapters/postgres/adaperrors"
 	"project-auction/internal/common/apperrors"
 	"project-auction/internal/domain/entity"
 )
@@ -14,11 +16,13 @@ type PGCommentRepository interface {
 }
 
 type pgCommentRepository struct {
+	log      *slog.Logger
 	database *sqlx.DB
 }
 
-func NewCommentRepository(db *sqlx.DB) PGCommentRepository {
+func NewCommentRepository(log *slog.Logger, db *sqlx.DB) PGCommentRepository {
 	return &pgCommentRepository{
+		log:      log,
 		database: db,
 	}
 }
@@ -31,9 +35,11 @@ func (cr pgCommentRepository) InsertComment(comment entity.Comment) (entity.Comm
 	`
 
 	if err := cr.database.QueryRowx(q, comment.ItemID, comment.OwnerID, comment.Body).Scan(&comment.ID); err != nil {
+		cr.log.Error("failed to execute request to db", slog.String("error", err.Error()))
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) {
-			if pqErr.Code == "23505" {
+			if pqErr.Code == adaperrors.UniqueViolation {
+				cr.log.Error("failed to execute request to db", slog.String("error", "unique violation"))
 				return entity.Comment{}, apperrors.NewConflict("body", comment.Body)
 			}
 		}

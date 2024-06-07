@@ -4,6 +4,8 @@ import (
 	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
+	"log/slog"
+	"project-auction/internal/adapters/postgres/adaperrors"
 	"project-auction/internal/common/apperrors"
 	"project-auction/internal/domain/entity"
 )
@@ -14,11 +16,13 @@ type PGSellerRepository interface {
 }
 
 type pgSellerRepository struct {
+	log      *slog.Logger
 	database *sqlx.DB
 }
 
-func NewSellerRepository(db *sqlx.DB) PGSellerRepository {
+func NewSellerRepository(log *slog.Logger, db *sqlx.DB) PGSellerRepository {
 	return &pgSellerRepository{
+		log:      log,
 		database: db,
 	}
 }
@@ -31,10 +35,11 @@ func (sr pgSellerRepository) InsertSeller(seller entity.Seller) (entity.Seller, 
 	`
 
 	if err := sr.database.QueryRowx(q, seller.Email, seller.Password, seller.Type).Scan(&seller.ID); err != nil {
-		// TODO
+		sr.log.Error("failed to execute request to db", slog.String("error", err.Error()))
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) {
-			if pqErr.Code == "23505" {
+			if pqErr.Code == adaperrors.UniqueViolation {
+				sr.log.Error("conflicts", slog.String("error", err.Error()))
 				return entity.Seller{}, apperrors.NewConflict("email", seller.Email)
 			}
 		}

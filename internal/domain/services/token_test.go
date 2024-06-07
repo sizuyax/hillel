@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -14,20 +13,14 @@ func TestGenerateJWTAccessToken(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, accessToken)
-
-	fmt.Println(accessToken, "---> error: ", err)
 }
 
 func TestParseJWTAccessToken(t *testing.T) {
 	accessToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTY4NTg3NDMsInByb2ZpbGVJRCI6MSwicHJvZmlsZVR5cGUiOiJzZWxsZXIifQ.x7NnP88AnaYf5cwfsn28mVcNsKRDHCYim1YucCnFe6A"
-
-	profileID, profileType, err := ParseJWTAccessToken(accessToken)
+	profileID, _, err := ParseJWTAccessToken(accessToken)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 1, profileID)
-
-	fmt.Println(profileID)
-	fmt.Println(profileType, "---> error: ", err)
 }
 
 func TestGenerateJWTRefreshToken(t *testing.T) {
@@ -38,8 +31,6 @@ func TestGenerateJWTRefreshToken(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, refreshToken)
-
-	fmt.Println("refresh token: ", refreshToken, "---> error: ", err)
 }
 
 func TestRefreshAccessJWTToken(t *testing.T) {
@@ -49,9 +40,6 @@ func TestRefreshAccessJWTToken(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, jwtPair)
-
-	fmt.Println("access token: ", jwtPair.AccessToken)
-	fmt.Println("refresh token: ", jwtPair.RefreshToken, "---> error: ", err)
 }
 
 func TestGenerateJWTPairTokens(t *testing.T) {
@@ -62,7 +50,4 @@ func TestGenerateJWTPairTokens(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, jwtPair)
-
-	fmt.Println("access token: ", jwtPair.AccessToken)
-	fmt.Println("refresh token: ", jwtPair.RefreshToken, "---> error: ", err)
 }

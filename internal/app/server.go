@@ -13,21 +13,17 @@ import (
 func InitWebServer(log *slog.Logger, db *sqlx.DB) *echo.Echo {
 	router := echo.New()
 
-	userRepository := repository.NewUserRepository(db)
-	userService := services.NewUserService(services.USConfig{
-		UserRepository: userRepository,
-	})
+	userRepository := repository.NewUserRepository(log, db)
+	userService := services.NewUserService(log, userRepository)
 
-	sellerRepository := repository.NewSellerRepository(db)
-	sellerService := services.NewSellerService(services.SSConfig{
-		SellerRepository: sellerRepository,
-	})
+	sellerRepository := repository.NewSellerRepository(log, db)
+	sellerService := services.NewSellerService(log, sellerRepository)
 
-	itemRepository := repository.NewItemRepository(db)
-	itemService := services.NewItemService(itemRepository)
+	itemRepository := repository.NewItemRepository(log, db)
+	itemService := services.NewItemService(log, itemRepository)
 
-	commentRepository := repository.NewCommentRepository(db)
-	commentService := services.NewCommentService(commentRepository)
+	commentRepository := repository.NewCommentRepository(log, db)
+	commentService := services.NewCommentService(log, commentRepository)
 
 	handler := handlers.NewHandler(handlers.Config{
 		EchoRouter:     router,

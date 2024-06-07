@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"project-auction/internal/adapters/postgres/repository/mocks"
 	"project-auction/internal/domain/entity"
@@ -33,6 +32,4 @@ func TestInsertComment(t *testing.T) {
 	assert.Equal(t, expectedComment, createComment)
 
 	mockRepo.AssertExpectations(t)
-
-	fmt.Println(createComment, "---> error: ", err)
 }

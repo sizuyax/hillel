@@ -2,10 +2,12 @@ package services
 
 import (
 	"context"
-	"fmt"
+	"errors"
+	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"project-auction/internal/adapters/postgres/repository/mocks"
+	"project-auction/internal/common/apperrors"
 	"project-auction/internal/domain/entity"
 	"testing"
 )
@@ -45,20 +47,40 @@ func TestCreateItem(t *testing.T) {
 			ExpectedItem:   expectedItem,
 			ExpectedError:  nil,
 		},
+		{
+			Name:           "duplicate item name",
+			InsertItemCall: mockRepo.On("InsertItem", ctx, inputItem).Return(entity.Item{}, &pq.Error{Code: "23505"}),
+			InputItem:      inputItem,
+			ExpectedItem:   entity.Item{},
+			ExpectedError:  apperrors.NewConflict("name", inputItem.Name),
+		},
+		{
+			Name:           "invalid owner ID",
+			InsertItemCall: mockRepo.On("InsertItem", ctx, inputItem).Return(entity.Item{}, &pq.Error{Code: "23503"}),
+			InputItem:      inputItem,
+			ExpectedItem:   entity.Item{},
+			ExpectedError:  apperrors.NewUnprocessable(),
+		},
+		{
+			Name:           "unexpected database error",
+			InsertItemCall: mockRepo.On("InsertItem", ctx, inputItem).Return(entity.Item{}, errors.New("some database error")),
+			InputItem:      inputItem,
+			ExpectedItem:   entity.Item{},
+			ExpectedError:  errors.New("some database error"),
+		},
 	}
 
 	for _, tc := range testCases {
 		createItem, err := svc.CreateItem(ctx, tc.InputItem)
 
 		if assert.NoError(t, err) {
+			assert.Equal(t, tc.ExpectedError, err)
 			assert.Equal(t, tc.ExpectedItem, createItem)
 			assert.Equal(t, 1, createItem.ID)
 			assert.Equal(t, 1, createItem.OwnerID)
 			assert.Equal(t, float64(10), createItem.Price)
 		}
 		mockRepo.AssertExpectations(t)
-
-		fmt.Println(createItem, "---> error: ", err)
 	}
 }
 
@@ -112,6 +134,7 @@ func TestUpdateItem(t *testing.T) {
 		updateItem, err := svc.UpdateItem(ctx, tc.InputItem)
 
 		if assert.NoError(t, err) {
+<<<<<<< HEAD
 			assert.Equal(t, tc.ExpectedItem, updateItem)
 			assert.Equal(t, inputItem.Name, updateItem.Name)
 		}
@@ -121,4 +144,12 @@ func TestUpdateItem(t *testing.T) {
 		fmt.Println(updateItem, "---> error: ", err)
 	}
 
+=======
+			assert.Equal(t, tc.ExpectedError, err)
+			assert.Equal(t, tc.ExpectedItem, updateItem)
+			assert.Equal(t, inputItem.Name, updateItem.Name)
+		}
+		mockRepo.AssertExpectations(t)
+	}
+>>>>>>> 738e5b1 (fixed problems)
 }

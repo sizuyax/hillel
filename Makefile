@@ -14,7 +14,7 @@ swag-init: swag-fmt
 	swag init -g cmd/main.go
 
 goose-path:
-	export GOOSE_MIGRATION_DIR=/Users/ilaaleksienko/go/src/test/internal/adapters/postgres/migrations
+	export GOOSE_MIGRATION_DIR=internal/adapters/postgres/migrations
 
 goose-create:
 	goose create $(name)_table sql

@@ -5,6 +5,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	"log/slog"
+	"project-auction/internal/adapters/postgres/adaperrors"
 	"project-auction/internal/common/apperrors"
 	"project-auction/internal/domain/entity"
 )
@@ -19,8 +20,9 @@ type pgUserRepository struct {
 	database *sqlx.DB
 }
 
-func NewUserRepository(db *sqlx.DB) PGUserRepository {
+func NewUserRepository(log *slog.Logger, db *sqlx.DB) PGUserRepository {
 	return &pgUserRepository{
+		log:      log,
 		database: db,
 	}
 }
@@ -33,10 +35,11 @@ func (ur pgUserRepository) InsertUser(user entity.User) (entity.User, error) {
 	`
 
 	if err := ur.database.QueryRowx(q, user.Email, user.Password, user.Type).Scan(&user.ID); err != nil {
-		//TODO
+		ur.log.Error("failed to execute request to db", slog.String("error", err.Error()))
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) {
-			if pqErr.Code == "23505" {
+			if pqErr.Code == adaperrors.UniqueViolation {
+				ur.log.Error("conflict", slog.String("error", err.Error()))
 				return entity.User{}, apperrors.NewConflict("email", user.Email)
 			}
 		}
