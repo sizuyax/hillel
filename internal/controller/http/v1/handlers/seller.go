@@ -17,11 +17,11 @@ import (
 //	@Tags			Sellers
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body	httpmodels.CreateSellerRequest	true	"model for create seller"
+//	@Param			request	body	dto.CreateSellerRequest	true	"model for create seller"
 //	@Success		201
 //	@Failure		400			{object}	apperrors.Error
 //	@Failure		500			{object}	apperrors.Error
-//	@Router			/sellers 														[post]
+//	@Router			/sellers 																																				[post]
 func (h Handler) RegisterSeller(c echo.Context) error {
 	var req dto.CreateSellerRequest
 
@@ -35,18 +35,19 @@ func (h Handler) RegisterSeller(c echo.Context) error {
 		return c.JSON(apperrors.Status(err), err)
 	}
 
-	seller := &entity.Seller{
+	inputSeller := entity.Seller{
 		Email:    req.Email,
 		Password: req.Password,
+		Type:     "seller",
 	}
 
-	sellerRes, err := h.sellerService.CreateSeller(seller)
+	sellerRes, err := h.sellerService.CreateSeller(inputSeller)
 	if err != nil {
 		h.log.Error("failed to create seller", slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), err)
 	}
 
-	jwtPairs, err := services.GenerateJWTPairTokens(sellerRes.ID)
+	jwtPairs, err := services.GenerateJWTPairTokens(sellerRes.ID, sellerRes.Type)
 	if err != nil {
 		h.log.Error("failed to generate jwt pair tokens", slog.String("error", err.Error()))
 		return c.JSON(http.StatusInternalServerError, err)

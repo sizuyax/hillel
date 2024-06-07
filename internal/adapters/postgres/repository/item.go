@@ -1,13 +1,10 @@
-package postgres
+package repository
 
 import (
 	"context"
-	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	"log/slog"
 	"project-auction/internal/common/apperrors"
 	"project-auction/internal/domain/entity"
 )
@@ -22,20 +19,16 @@ type PGItemRepository interface {
 }
 
 type pgItemRepository struct {
-	log      *slog.Logger
 	database *sqlx.DB
 }
 
-func NewItemRepository(log *slog.Logger, db *sqlx.DB) PGItemRepository {
+func NewItemRepository(db *sqlx.DB) PGItemRepository {
 	return &pgItemRepository{
-		log:      log,
 		database: db,
 	}
 }
 
 func (ir *pgItemRepository) InsertItem(ctx context.Context, item entity.Item) (entity.Item, error) {
-	const op = "repository.InsertItem"
-
 	q := `
 	INSERT INTO items (owner_id, name, price)
 	VALUES ($1, $2, $3)
@@ -43,23 +36,22 @@ func (ir *pgItemRepository) InsertItem(ctx context.Context, item entity.Item) (e
 	`
 
 	if err := ir.database.QueryRowxContext(ctx, q, item.OwnerID, item.Name, item.Price).Scan(&item.ID); err != nil {
-		ir.log.ErrorContext(ctx, fmt.Sprintf("%s: %v", op, err))
-
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) {
 			if pqErr.Code == "23505" {
 				return entity.Item{}, apperrors.NewConflict("name", item.Name)
 			}
+			if pqErr.Code == "23503" {
+				return entity.Item{}, apperrors.NewUnprocessable()
+			}
 		}
-		return entity.Item{}, fmt.Errorf("%s:%v", op, err)
+		return entity.Item{}, err
 	}
 
 	return item, nil
 }
 
 func (ir *pgItemRepository) SelectItems(ctx context.Context) ([]entity.Item, error) {
-	const op = "repository.SelectItems"
-
 	q := `
 	SELECT * FROM items;
 	`
@@ -67,24 +59,21 @@ func (ir *pgItemRepository) SelectItems(ctx context.Context) ([]entity.Item, err
 	var itemArray []entity.Item
 	rows, err := ir.database.QueryxContext(ctx, q)
 	if err != nil {
-		ir.log.ErrorContext(ctx, fmt.Sprintf("%s:%v", op, err))
-		return []entity.Item{}, fmt.Errorf("%s:%v", op, err)
+		return []entity.Item{}, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var item entity.Item
 		if err := rows.Scan(&item.ID, &item.OwnerID, &item.Name, &item.Price); err != nil {
-			ir.log.ErrorContext(ctx, fmt.Sprintf("%s:%v", op, err))
-			return []entity.Item{}, fmt.Errorf("%s:%v", op, err)
+			return []entity.Item{}, err
 		}
 
 		itemArray = append(itemArray, item)
 	}
 
 	if err := rows.Err(); err != nil {
-		ir.log.ErrorContext(ctx, fmt.Sprintf("%s:%v", op, err))
-		return []entity.Item{}, fmt.Errorf("%s:%v", op, err)
+		return []entity.Item{}, err
 	}
 
 	if len(itemArray) == 0 {
@@ -95,8 +84,6 @@ func (ir *pgItemRepository) SelectItems(ctx context.Context) ([]entity.Item, err
 }
 
 func (ir *pgItemRepository) SelectItemByID(ctx context.Context, id int) (entity.Item, error) {
-	const op = "repository.SelectItemByID"
-
 	q := `
 	SELECT * FROM items
 	WHERE id=$1;
@@ -104,21 +91,13 @@ func (ir *pgItemRepository) SelectItemByID(ctx context.Context, id int) (entity.
 
 	var item entity.Item
 	if err := ir.database.QueryRowxContext(ctx, q, id).Scan(&item.ID, &item.OwnerID, &item.Name, &item.Price); err != nil {
-		ir.log.ErrorContext(ctx, fmt.Sprintf("%s:%v", op, err))
-
-		if errors.Is(err, sql.ErrNoRows) {
-			return entity.Item{}, apperrors.NewNoRows()
-		}
-
-		return entity.Item{}, fmt.Errorf("%s:%v", op, err)
+		return entity.Item{}, err
 	}
 
 	return item, nil
 }
 
 func (ir *pgItemRepository) UpdateItem(ctx context.Context, item entity.Item) (entity.Item, error) {
-	const op = "repository.UpdateItem"
-
 	q := `
 	UPDATE items
 	SET owner_id=$1, name=$2, price=$3
@@ -128,17 +107,13 @@ func (ir *pgItemRepository) UpdateItem(ctx context.Context, item entity.Item) (e
 
 	var updateItem entity.Item
 	if err := ir.database.QueryRowxContext(ctx, q, item.OwnerID, item.Name, item.Price, item.ID).Scan(&updateItem.ID, &updateItem.OwnerID, &updateItem.Name, &updateItem.Price); err != nil {
-		ir.log.ErrorContext(ctx, fmt.Sprintf("%s: %v", op, err))
-
-		return entity.Item{}, fmt.Errorf("%s:%v", op, err)
+		return entity.Item{}, err
 	}
 
 	return updateItem, nil
 }
 
 func (ir *pgItemRepository) DeleteItemByID(ctx context.Context, id int) error {
-	const op = "repository.DeleteItemByID"
-
 	q := `
 	DELETE FROM items
 	WHERE id=$1
@@ -146,14 +121,12 @@ func (ir *pgItemRepository) DeleteItemByID(ctx context.Context, id int) error {
 
 	res, err := ir.database.ExecContext(ctx, q, id)
 	if err != nil {
-		ir.log.Error(fmt.Sprintf("%s:%v", op, err))
-		return fmt.Errorf("%s:%v", op, err)
+		return err
 	}
 
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
-		ir.log.Error(fmt.Sprintf("%s: %v", op, err))
-		return fmt.Errorf("%s:%v", op, err)
+		return err
 	}
 
 	if rowsAffected == 0 {

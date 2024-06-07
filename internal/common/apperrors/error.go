@@ -9,10 +9,12 @@ import (
 type ErrorType string
 
 const (
-	Authorization ErrorType = "AUTHORIZATION"
-	BadRequest    ErrorType = "BAD_REQUEST" // BadInput - 400
-	Conflict      ErrorType = "CONFLICT"    // Already exists (eg, create account with existent email) - 409
-	Internal      ErrorType = "INTERNAL"    // Server (500) and fallback apperrors - 500
+	Authorization ErrorType = "AUTHORIZATION" // 401 UnAuthorize
+	BadRequest    ErrorType = "BAD_REQUEST"   // BadInput - 400
+	Conflict      ErrorType = "CONFLICT"      // Already exists (eg, create account with existent email) - 409
+	Internal      ErrorType = "INTERNAL"      // Server (500) and fallback apperrors - 500
+	NoRows        ErrorType = "NO_ROWS"       // 404 Not Found
+	Unprocessable ErrorType = "UNPROCESSABLE" // 422 Unprocessable Entity
 )
 
 type Error struct {
@@ -32,6 +34,12 @@ func (e *Error) Status() int {
 		return http.StatusConflict
 	case Internal:
 		return http.StatusInternalServerError
+	case Authorization:
+		return http.StatusUnauthorized
+	case Unprocessable:
+		return http.StatusUnprocessableEntity
+	case NoRows:
+		return http.StatusNotFound
 	default:
 		return http.StatusInternalServerError
 	}
@@ -68,8 +76,8 @@ func NewInternal() *Error {
 
 func NewNoRows() *Error {
 	return &Error{
-		Type:    Internal,
-		Message: "Database has no rows.",
+		Type:    NoRows,
+		Message: "no rows found",
 	}
 }
 
@@ -77,5 +85,12 @@ func NewAuthorization(reason string) *Error {
 	return &Error{
 		Type:    Authorization,
 		Message: reason,
+	}
+}
+
+func NewUnprocessable() *Error {
+	return &Error{
+		Type:    Unprocessable,
+		Message: "foreign key constraint violation",
 	}
 }

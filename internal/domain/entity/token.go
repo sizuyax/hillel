@@ -4,7 +4,8 @@ import "github.com/dgrijalva/jwt-go"
 
 type AccessJWTClaims struct {
 	jwt.StandardClaims
-	SellerID int `json:"sellerID"`
+	ProfileID   int    `json:"profileID"`
+	ProfileType string `json:"profileType"`
 }
 
 type RefreshJWTClaims struct {

@@ -7,18 +7,19 @@ import (
 	"time"
 )
 
-func GenerateJWTAccessToken(sellerID int) (string, error) {
+func GenerateJWTAccessToken(profileID int, profileType string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &entity.AccessJWTClaims{
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(10 * time.Minute).UTC().Unix(),
+			ExpiresAt: time.Now().Add(10 * time.Hour).UTC().Unix(),
 		},
-		SellerID: sellerID,
+		ProfileID:   profileID,
+		ProfileType: profileType,
 	})
 
 	return token.SignedString([]byte("test"))
 }
 
-func ParseJWTAccessToken(accessToken string) (int, error) {
+func ParseJWTAccessToken(accessToken string) (int, string, error) {
 	const op = "services.ParseJWTAccessToken"
 
 	token, err := jwt.ParseWithClaims(accessToken, &entity.AccessJWTClaims{}, func(token *jwt.Token) (interface{}, error) {
@@ -29,23 +30,24 @@ func ParseJWTAccessToken(accessToken string) (int, error) {
 		return []byte("test"), nil
 	})
 	if err != nil {
-		return 0, fmt.Errorf("%s:%v", op, err)
+		return 0, "", fmt.Errorf("%s:%v", op, err)
 	}
 
 	claims, ok := token.Claims.(*entity.AccessJWTClaims)
 	if !ok {
-		return 0, fmt.Errorf("%s: failed to parse claims: %v", op, err)
+		return 0, "", fmt.Errorf("%s: failed to parse claims: %v", op, err)
 	}
 
-	return claims.SellerID, nil
+	return claims.ProfileID, claims.ProfileType, nil
 }
 
-func GenerateJWTRefreshToken(sellerID int) (string, error) {
+func GenerateJWTRefreshToken(profileID int, profileType string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &entity.AccessJWTClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(10 * time.Hour).UTC().Unix(),
 		},
-		SellerID: sellerID,
+		ProfileID:   profileID,
+		ProfileType: profileType,
 	})
 
 	return token.SignedString([]byte("test-1"))
@@ -70,16 +72,16 @@ func RefreshAccessJWTToken(refreshToken string) (*entity.PairJWTClaims, error) {
 		return nil, fmt.Errorf("%s: failed to parse claims: %v", op, err)
 	}
 
-	return GenerateJWTPairTokens(claims.SellerID)
+	return GenerateJWTPairTokens(claims.ProfileID, claims.ProfileType)
 }
 
-func GenerateJWTPairTokens(sellerID int) (*entity.PairJWTClaims, error) {
-	accessToken, err := GenerateJWTAccessToken(sellerID)
+func GenerateJWTPairTokens(profileID int, profileType string) (*entity.PairJWTClaims, error) {
+	accessToken, err := GenerateJWTAccessToken(profileID, profileType)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := GenerateJWTRefreshToken(sellerID)
+	refreshToken, err := GenerateJWTRefreshToken(profileID, profileType)
 	if err != nil {
 		return nil, err
 	}

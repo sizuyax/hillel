@@ -5,58 +5,63 @@ definitions:
       message:
         type: string
       type:
-        $ref: '#/definitions/apperrors.Type'
+        $ref: '#/definitions/apperrors.ErrorType'
     type: object
-  apperrors.Type:
+  apperrors.ErrorType:
     enum:
     - AUTHORIZATION
     - BAD_REQUEST
     - CONFLICT
     - INTERNAL
+    - NO_ROWS
+    - UNPROCESSABLE
     type: string
     x-enum-comments:
+      Authorization: 401 UnAuthorize
       BadRequest: BadInput - 400
       Conflict: Already exists (eg, create account with existent email) - 409
       Internal: Server (500) and fallback apperrors - 500
+      NoRows: 404 Not Found
+      Unprocessable: 422 Unprocessable Entity
     x-enum-varnames:
     - Authorization
     - BadRequest
     - Conflict
     - Internal
-  httpmodels.CreateItemRequest:
+    - NoRows
+    - Unprocessable
+  dto.CreateCommentRequest:
+    properties:
+      body:
+        type: string
+    type: object
+  dto.CreateItemRequest:
     properties:
       name:
         type: string
       price:
         type: number
     type: object
-  httpmodels.CreateSellerRequest:
+  dto.CreateSellerRequest:
     properties:
       email:
         type: string
       password:
         type: string
     type: object
-  httpmodels.CreateUserRequest:
+  dto.CreateUserRequest:
     properties:
       email:
         type: string
       password:
         type: string
     type: object
-  httpmodels.RefreshTokensRequest:
+  dto.RefreshTokensRequest:
     properties:
       refreshToken:
         type: string
     type: object
-  httpmodels.RefreshTokensResponse:
-    properties:
-      accessToken:
-        type: string
-      refreshToken:
-        type: string
-    type: object
-  httpmodels.UpdateItemRequest:
+  dto.UpdateItemRequest:
     properties:
       id:
         type: integer
@@ -65,7 +70,18 @@ definitions:
       price:
         type: number
     type: object
-  models.Item:
+  entity.Comment:
+    properties:
+      body:
+        type: string
+      id:
+        type: integer
+      item_id:
+        type: integer
+      owner_id:
+        type: integer
+    type: object
+  entity.Item:
     properties:
       id:
         type: integer
@@ -75,6 +91,13 @@ definitions:
         type: integer
       price:
         type: number
+    type: object
+  entity.PairJWTClaims:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
     type: object
 host: http://swagger.io/terms/
 info:
@@ -94,14 +117,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/httpmodels.RefreshTokensRequest'
+          $ref: '#/definitions/dto.RefreshTokensRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/httpmodels.RefreshTokensResponse'
+            $ref: '#/definitions/entity.PairJWTClaims'
         "400":
           description: Bad Request
           schema:
@@ -125,8 +148,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Item'
+              $ref: '#/definitions/entity.Item'
             type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
         "500":
           description: Internal Server Error
           schema:
@@ -144,16 +171,24 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/httpmodels.CreateItemRequest'
+          $ref: '#/definitions/dto.CreateItemRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Item'
+            $ref: '#/definitions/entity.Item'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "422":
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/apperrors.Error'
         "500":
@@ -210,7 +245,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Item'
+            $ref: '#/definitions/entity.Item'
         "400":
           description: Bad Request
           schema:
@@ -232,14 +267,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/httpmodels.UpdateItemRequest'
+          $ref: '#/definitions/dto.UpdateItemRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Item'
+            $ref: '#/definitions/entity.Item'
         "400":
           description: Bad Request
           schema:
@@ -253,6 +288,43 @@ paths:
       summary: Update item
       tags:
       - Items
+  /items/{id}/comments:
+    post:
+      consumes:
+      - application/json
+      description: Comment item
+      parameters:
+      - description: comment item with id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: model for create comment
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Comment item
+      tags:
+      - Comments
   /sellers:
     post:
       consumes:
@@ -264,7 +336,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/httpmodels.CreateSellerRequest'
+          $ref: '#/definitions/dto.CreateSellerRequest'
       produces:
       - application/json
       responses:
@@ -292,7 +364,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/httpmodels.CreateUserRequest'
+          $ref: '#/definitions/dto.CreateUserRequest'
       produces:
       - application/json
       responses:

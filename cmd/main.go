@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"project-auction/docs"
-	"project-auction/internal/adapters/database/postgres"
+	"project-auction/internal/adapters/postgres/database"
 	"project-auction/internal/app"
 	"project-auction/internal/config"
 	"project-auction/internal/lib/logger"
@@ -32,15 +32,12 @@ func main() {
 
 	cfg := config.MustLoad()
 
-	db, err := postgres.Connect(cfg)
+	db, err := database.Connect(cfg)
 	if err != nil {
 		panic(err)
 	}
 
 	log := logger.SetupLogger(cfg.LogLevel)
-	log = log.With(
-		slog.Int("port", cfg.Port),
-	)
 
 	router := app.InitWebServer(log, db)
 
@@ -55,7 +52,7 @@ func main() {
 		}
 	}()
 
-	log.Info("http server started")
+	log.Info("http server started", slog.Int("port", cfg.Port))
 
 	gracefulShutdown(srv, log)
 }

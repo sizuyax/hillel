@@ -2,7 +2,7 @@ package services
 
 import (
 	"golang.org/x/net/context"
-	"project-auction/internal/adapters/repository/postgres"
+	"project-auction/internal/adapters/postgres/repository"
 	"project-auction/internal/domain/entity"
 )
 
@@ -15,10 +15,10 @@ type ItemService interface {
 }
 
 type itemService struct {
-	ItemRepository postgres.PGItemRepository
+	ItemRepository repository.PGItemRepository
 }
 
-func NewItemService(itemRepository postgres.PGItemRepository) ItemService {
+func NewItemService(itemRepository repository.PGItemRepository) ItemService {
 	return &itemService{
 		ItemRepository: itemRepository,
 	}

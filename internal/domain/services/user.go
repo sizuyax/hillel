@@ -1,20 +1,20 @@
 package services
 
 import (
-	"project-auction/internal/adapters/repository/postgres"
+	"project-auction/internal/adapters/postgres/repository"
 	"project-auction/internal/domain/entity"
 )
 
 type UserService interface {
-	CreateUser(*entity.User) (*entity.User, error)
+	CreateUser(entity.User) (entity.User, error)
 }
 
 type userService struct {
-	UserRepository postgres.PGUserRepository
+	UserRepository repository.PGUserRepository
 }
 
 type USConfig struct {
-	UserRepository postgres.PGUserRepository
+	UserRepository repository.PGUserRepository
 }
 
 func NewUserService(cfg USConfig) UserService {
@@ -23,11 +23,10 @@ func NewUserService(cfg USConfig) UserService {
 	}
 }
 
-func (us *userService) CreateUser(user *entity.User) (*entity.User, error) {
-
-	user, err := us.UserRepository.InsertUser(user)
+func (us *userService) CreateUser(inputUser entity.User) (entity.User, error) {
+	user, err := us.UserRepository.InsertUser(inputUser)
 	if err != nil {
-		return &entity.User{}, err
+		return entity.User{}, err
 	}
 
 	return user, nil

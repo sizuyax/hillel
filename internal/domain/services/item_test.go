@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"project-auction/internal/adapters/repository/postgres/mocks"
+	"project-auction/internal/adapters/postgres/repository/mocks"
 	"project-auction/internal/domain/entity"
 	"testing"
 )
