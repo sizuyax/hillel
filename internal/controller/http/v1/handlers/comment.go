@@ -26,7 +26,7 @@ import (
 //	@Success		200						{object}	entity.Comment
 //	@Failure		400						{object}	apperrors.Error
 //	@Failure		500						{object}	apperrors.Error
-//	@Router			/items/{id}/comments 																		[post]																	[get]
+//	@Router			/items/{id}/comments 																				[post]																	[get]
 func (h Handler) CreateComment(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
@@ -37,13 +37,13 @@ func (h Handler) CreateComment(c echo.Context) error {
 	itemID := c.Param("id")
 	itemIDInt, err := strconv.Atoi(itemID)
 	if err != nil {
-		h.log.ErrorContext(ctx, "failed to parse id", slog.String("error", err.Error()))
+		h.log.Error("failed to parse id", slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), apperrors.NewBadRequest("id must be integer."))
 	}
 
 	itemRes, err := h.itemService.GetItemByID(ctx, itemIDInt)
 	if err != nil {
-		h.log.ErrorContext(ctx, "failed to get item", slog.Int("id", itemIDInt), slog.String("error", err.Error()))
+		h.log.Error("failed to get item", slog.Int("id", itemIDInt), slog.String("error", err.Error()))
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(apperrors.Status(err), apperrors.NewNoRows())
 		}

@@ -16,8 +16,8 @@ func NewContextFromEchoContext(c echo.Context) (context.Context, error) {
 		customCtx = cc
 	}
 
-	ctx := context.WithValue(context.Background(), entity.ProfileIDKey, customCtx.ProfileID)
-	ctx = context.WithValue(ctx, entity.ProfileTypeKey, customCtx.ProfileType)
+	ctxValue := context.WithValue(context.Background(), entity.ProfileIDKey, customCtx.ProfileID)
+	ctx := context.WithValue(ctxValue, entity.ProfileTypeKey, customCtx.ProfileType)
 
 	return ctx, nil
 }

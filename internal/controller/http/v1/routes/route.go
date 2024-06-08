@@ -7,7 +7,7 @@ import (
 )
 
 func SetupRoutes(cfg handlers.Config, handler handlers.Handler) {
-	itemGroupWithToken := cfg.EchoRouter.Group("/items", middlewares.ParseAccessSellerToken)
+	itemGroupWithToken := cfg.EchoRouter.Group("/items", middlewares.ParseAccessSellerToken(cfg.TokenService))
 	itemGroupWithToken.POST("", handler.CreateItem)
 	itemGroupWithToken.PUT("/:id", handler.UpdateItem)
 	itemGroupWithToken.DELETE("/:id", handler.DeleteItemByID)
@@ -15,7 +15,7 @@ func SetupRoutes(cfg handlers.Config, handler handlers.Handler) {
 	itemGroup := cfg.EchoRouter.Group("/items")
 	itemGroup.GET("", handler.GetItems)
 	itemGroup.GET("/:id", handler.GetItemByID)
-	itemGroup.POST("/:id/comments", handler.CreateComment, middlewares.ParseAccessToken)
+	itemGroup.POST("/:id/comments", handler.CreateComment, middlewares.ParseAccessToken(cfg.TokenService))
 
 	sellerGroup := cfg.EchoRouter.Group("/sellers")
 	sellerGroup.POST("", handler.RegisterSeller)

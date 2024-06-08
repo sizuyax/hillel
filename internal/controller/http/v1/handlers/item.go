@@ -27,7 +27,7 @@ import (
 //	@Failure		500		{object}	apperrors.Error
 //	@Failure		422		{object}	apperrors.Error
 //	@Failure		409		{object}	apperrors.Error
-//	@Router			/items																																				    [post]
+//	@Router			/items																																						    [post]
 func (h Handler) CreateItem(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
@@ -71,7 +71,7 @@ func (h Handler) CreateItem(c echo.Context) error {
 //	@Success		200		{object}	[]entity.Item
 //	@Failure		500		{object}	apperrors.Error
 //	@Failure		404		{object}	apperrors.Error
-//	@Router			/items 																																				[get]
+//	@Router			/items 																																						[get]
 func (h Handler) GetItems(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
@@ -113,7 +113,7 @@ func (h Handler) GetItems(c echo.Context) error {
 //	@Success		200				{object}	entity.Item
 //	@Failure		400				{object}	apperrors.Error
 //	@Failure		500				{object}	apperrors.Error
-//	@Router			/items/{id} 																																			[get]
+//	@Router			/items/{id} 																																					[get]
 func (h Handler) GetItemByID(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
@@ -157,7 +157,7 @@ func (h Handler) GetItemByID(c echo.Context) error {
 //	@Success		200				{object}	entity.Item
 //	@Failure		400				{object}	apperrors.Error
 //	@Failure		500				{object}	apperrors.Error
-//	@Router			/items/{id} 																																			[put]
+//	@Router			/items/{id} 																																					[put]
 func (h Handler) UpdateItem(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
@@ -213,7 +213,7 @@ func (h Handler) UpdateItem(c echo.Context) error {
 //	@Success		200
 //	@Failure		400				{object}	apperrors.Error
 //	@Failure		500				{object}	apperrors.Error
-//	@Router			/items/{id} 																																			[delete]
+//	@Router			/items/{id} 																																					[delete]
 func (h Handler) DeleteItemByID(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {

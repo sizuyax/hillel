@@ -12,6 +12,7 @@ type Handler struct {
 	sellerService  services.SellerService
 	itemService    services.ItemService
 	commentService services.CommentService
+	tokenService   services.TokenService
 }
 
 type Config struct {
@@ -21,15 +22,16 @@ type Config struct {
 	SellerService  services.SellerService
 	ItemService    services.ItemService
 	CommentService services.CommentService
+	TokenService   services.TokenService
 }
 
 func NewHandler(cfg Config) Handler {
-	h := Handler{
+	return Handler{
 		log:            cfg.Log,
 		userService:    cfg.UserService,
 		sellerService:  cfg.SellerService,
 		itemService:    cfg.ItemService,
 		commentService: cfg.CommentService,
+		tokenService:   cfg.TokenService,
 	}
-	return h
 }

@@ -5,12 +5,13 @@ import (
 	"github.com/labstack/echo/v4"
 	"log/slog"
 	"project-auction/internal/adapters/postgres/repository"
+	"project-auction/internal/config"
 	"project-auction/internal/controller/http/v1/handlers"
 	"project-auction/internal/controller/http/v1/routes"
 	"project-auction/internal/domain/services"
 )
 
-func InitWebServer(log *slog.Logger, db *sqlx.DB) *echo.Echo {
+func InitWebServer(log *slog.Logger, db *sqlx.DB, tokenCfg config.Config) *echo.Echo {
 	router := echo.New()
 
 	userRepository := repository.NewUserRepository(log, db)
@@ -25,6 +26,8 @@ func InitWebServer(log *slog.Logger, db *sqlx.DB) *echo.Echo {
 	commentRepository := repository.NewCommentRepository(log, db)
 	commentService := services.NewCommentService(log, commentRepository)
 
+	tokenService := services.NewTokenService(log, tokenCfg.AccessSignedString, tokenCfg.RefreshSignedString)
+
 	handler := handlers.NewHandler(handlers.Config{
 		EchoRouter:     router,
 		Log:            log,
@@ -32,10 +35,12 @@ func InitWebServer(log *slog.Logger, db *sqlx.DB) *echo.Echo {
 		SellerService:  sellerService,
 		ItemService:    itemService,
 		CommentService: commentService,
+		TokenService:   tokenService,
 	})
 
 	routes.SetupRoutes(handlers.Config{
-		EchoRouter: router,
+		EchoRouter:   router,
+		TokenService: tokenService,
 	}, handler)
 
 	return router

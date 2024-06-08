@@ -39,7 +39,7 @@ func main() {
 
 	log := logger.SetupLogger(cfg.LogLevel)
 
-	router := app.InitWebServer(log, db)
+	router := app.InitWebServer(log, db, cfg)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Port),

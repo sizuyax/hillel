@@ -21,7 +21,7 @@ import (
 //	@Success		200				{object}	entity.PairJWTClaims
 //	@Failure		400				{object}	apperrors.Error
 //	@Failure		500				{object}	apperrors.Error
-//	@Router			/auth/tokens 																																				[post]
+//	@Router			/auth/tokens 																																						[post]
 func (h Handler) RefreshTokens(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
@@ -36,7 +36,7 @@ func (h Handler) RefreshTokens(c echo.Context) error {
 		return c.JSON(apperrors.Status(err), apperrors.NewInternal())
 	}
 
-	jwtPairs, err := services.RefreshAccessJWTToken(req.RefreshToken)
+	jwtPairs, err := h.tokenService.RefreshAccessJWTToken(req.RefreshToken)
 	if err != nil {
 		h.log.ErrorContext(ctx, "failed to refresh jwt access token", slog.String("error", err.Error()))
 		return c.JSON(apperrors.Status(err), apperrors.NewInternal())

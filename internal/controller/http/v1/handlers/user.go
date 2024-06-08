@@ -7,7 +7,6 @@ import (
 	"project-auction/internal/common/apperrors"
 	"project-auction/internal/controller/http/v1/dto"
 	"project-auction/internal/domain/entity"
-	"project-auction/internal/domain/services"
 )
 
 // RegisterUser 	godoc
@@ -21,7 +20,7 @@ import (
 //	@Success		201
 //	@Failure		400		{object}	apperrors.Error
 //	@Failure		500		{object}	apperrors.Error
-//	@Router			/users 																																					[post]
+//	@Router			/users 																																							[post]
 func (h Handler) RegisterUser(c echo.Context) error {
 	var req dto.CreateUserRequest
 
@@ -46,7 +45,7 @@ func (h Handler) RegisterUser(c echo.Context) error {
 		return c.JSON(apperrors.Status(err), err)
 	}
 
-	jwtPair, err := services.GenerateJWTPairTokens(userRes.ID, userRes.Type)
+	jwtPair, err := h.tokenService.GenerateJWTPairTokens(userRes.ID, userRes.Type)
 	if err != nil {
 		h.log.Error("failed to generate jwt pair tokens", slog.String("error", err.Error()))
 		return apperrors.NewInternal()

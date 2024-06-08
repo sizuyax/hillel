@@ -7,7 +7,7 @@ import (
 	"project-auction/internal/config"
 )
 
-func Connect(cfg *config.Config) (*sqlx.DB, error) {
+func Connect(cfg config.Config) (*sqlx.DB, error) {
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		cfg.DBUser,
 		cfg.DBPass,
