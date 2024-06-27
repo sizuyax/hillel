@@ -291,6 +291,64 @@
                 }
             }
         },
+        "/items/{id}/bids": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create bid for item",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bids"
+                ],
+                "summary": "Create bid for item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "item id for bid",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "model for create bid",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateBidRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.Bid"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/items/{id}/comments": {
             "post": {
                 "security": [
@@ -475,6 +533,14 @@
                 "Unprocessable"
             ]
         },
+        "dto.CreateBidRequest": {
+            "type": "object",
+            "properties": {
+                "points": {
+                    "type": "number"
+                }
+            }
+        },
         "dto.CreateCommentRequest": {
             "type": "object",
             "properties": {
@@ -534,6 +600,23 @@
                     "type": "string"
                 },
                 "price": {
+                    "type": "number"
+                }
+            }
+        },
+        "entity.Bid": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "item_id": {
+                    "type": "integer"
+                },
+                "owner_id": {
+                    "type": "integer"
+                },
+                "points": {
                     "type": "number"
                 }
             }

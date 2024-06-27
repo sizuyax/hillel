@@ -5,13 +5,14 @@ import (
 	"github.com/labstack/echo/v4"
 	"log/slog"
 	"project-auction/internal/adapters/postgres/repository"
+	"project-auction/internal/adapters/storage"
 	"project-auction/internal/config"
 	"project-auction/internal/controller/http/v1/handlers"
 	"project-auction/internal/controller/http/v1/routes"
 	"project-auction/internal/domain/services"
 )
 
-func InitWebServer(log *slog.Logger, db *sqlx.DB, tokenCfg config.Config) *echo.Echo {
+func InitWebServer(log *slog.Logger, db *sqlx.DB, cfg config.Config) *echo.Echo {
 	router := echo.New()
 
 	userRepository := repository.NewUserRepository(log, db)
@@ -26,7 +27,13 @@ func InitWebServer(log *slog.Logger, db *sqlx.DB, tokenCfg config.Config) *echo.
 	commentRepository := repository.NewCommentRepository(log, db)
 	commentService := services.NewCommentService(log, commentRepository)
 
-	tokenService := services.NewTokenService(log, tokenCfg.AccessSignedString, tokenCfg.RefreshSignedString)
+	bidRepository := repository.NewBidRepository(log, db)
+	bidService := services.NewBidService(log, bidRepository)
+
+	tokenService := services.NewTokenService(log, cfg.AccessSignedString, cfg.RefreshSignedString)
+
+	minioStorage := storage.NewMinioStorage(log, cfg)
+	minioStorage.Bucket()
 
 	handler := handlers.NewHandler(handlers.Config{
 		EchoRouter:     router,
@@ -36,6 +43,8 @@ func InitWebServer(log *slog.Logger, db *sqlx.DB, tokenCfg config.Config) *echo.
 		ItemService:    itemService,
 		CommentService: commentService,
 		TokenService:   tokenService,
+		BidService:     bidService,
+		MinioStorage:   minioStorage,
 	})
 
 	routes.SetupRoutes(handlers.Config{

@@ -23,11 +23,11 @@ func NewCommentService(log *slog.Logger, commentRepository repository.PGCommentR
 }
 
 func (ss commentService) CreateComment(inputComment entity.Comment) (entity.Comment, error) {
-	expectedComment, err := ss.CommentRepository.InsertComment(inputComment)
+	expectComment, err := ss.CommentRepository.InsertComment(inputComment)
 	if err != nil {
 		ss.log.Error("failed to insert comment", slog.String("error", err.Error()))
 		return entity.Comment{}, err
 	}
 
-	return expectedComment, nil
+	return expectComment, nil
 }

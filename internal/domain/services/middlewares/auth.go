@@ -9,7 +9,11 @@ import (
 	"project-auction/internal/domain/services/dto"
 )
 
-func ParseAccessToken(tokenService services.TokenService) echo.MiddlewareFunc {
+const (
+	authorization = "Authorization"
+)
+
+func ParseAccessUserToken(tokenService services.TokenService) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			var err error
@@ -21,7 +25,7 @@ func ParseAccessToken(tokenService services.TokenService) echo.MiddlewareFunc {
 				customCtx = &dto.CustomContext{Context: c}
 			}
 
-			accessToken := c.Request().Header.Get("Authorization")
+			accessToken := c.Request().Header.Get(authorization)
 
 			customCtx.ProfileID, customCtx.ProfileType, err = tokenService.ParseJWTAccessToken(accessToken)
 			if err != nil {
@@ -46,7 +50,7 @@ func ParseAccessSellerToken(tokenService services.TokenService) echo.MiddlewareF
 				customCtx = &dto.CustomContext{Context: c}
 			}
 
-			accessToken := c.Request().Header.Get("Authorization")
+			accessToken := c.Request().Header.Get(authorization)
 
 			customCtx.ProfileID, customCtx.ProfileType, err = tokenService.ParseJWTAccessToken(accessToken)
 			if err != nil {

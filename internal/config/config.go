@@ -7,15 +7,23 @@ import (
 )
 
 type Config struct {
-	Port                int    `env:"PORT" envDefault:"1323"`
-	LogLevel            string `env:"LOG_LEVEL" envDefault:"info"`
-	DBUser              string `env:"DB_USER"`
-	DBPass              string `env:"DB_PASS"`
-	DBHost              string `env:"DB_HOST"`
-	DBPort              string `env:"DB_PORT"`
-	DBName              string `env:"DB_NAME"`
+	Port int `env:"PORT" envDefault:"1323"`
+
+	LogLevel string `env:"LOG_LEVEL" envDefault:"info"`
+
+	DBUser string `env:"DB_USER"`
+	DBPass string `env:"DB_PASS"`
+	DBHost string `env:"DB_HOST"`
+	DBPort string `env:"DB_PORT"`
+	DBName string `env:"DB_NAME"`
+
 	AccessSignedString  string `env:"ACCESS_SIGNED_STRING"`
 	RefreshSignedString string `env:"REFRESH_SIGNED_STRING"`
+
+	MinioEndpoint        string `env:"MINIO_ENDPOINT"`
+	MinioAccessKey       string `env:"MINIO_ACCESS_KEY"`
+	MinioSecretAccessKey string `env:"MINIO_SECRET_ACCESS_KEY"`
+	MinioBucketName      string `env:"MINIO_BUCKET_NAME"`
 }
 
 func MustLoad() Config {

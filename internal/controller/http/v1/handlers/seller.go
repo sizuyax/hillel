@@ -20,7 +20,7 @@ import (
 //	@Success		201
 //	@Failure		400			{object}	apperrors.Error
 //	@Failure		500			{object}	apperrors.Error
-//	@Router			/sellers 																																						[post]
+//	@Router			/sellers 																																																				[post]
 func (h Handler) RegisterSeller(c echo.Context) error {
 	var req dto.CreateSellerRequest
 

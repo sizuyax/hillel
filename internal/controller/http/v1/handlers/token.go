@@ -21,7 +21,7 @@ import (
 //	@Success		200				{object}	entity.PairJWTClaims
 //	@Failure		400				{object}	apperrors.Error
 //	@Failure		500				{object}	apperrors.Error
-//	@Router			/auth/tokens 																																						[post]
+//	@Router			/auth/tokens 																																																				[post]
 func (h Handler) RefreshTokens(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {
