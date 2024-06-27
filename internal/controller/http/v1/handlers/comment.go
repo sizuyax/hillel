@@ -26,7 +26,7 @@ import (
 //	@Success		200						{object}	entity.Comment
 //	@Failure		400						{object}	apperrors.Error
 //	@Failure		500						{object}	apperrors.Error
-//	@Router			/items/{id}/comments 																				[post]																	[get]
+//	@Router			/items/{id}/comments 																													[post]																	[get]
 func (h Handler) CreateComment(c echo.Context) error {
 	ctx, err := services.NewContextFromEchoContext(c)
 	if err != nil {

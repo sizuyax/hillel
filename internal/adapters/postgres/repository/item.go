@@ -96,8 +96,22 @@ func (ir *pgItemRepository) SelectItemByID(ctx context.Context, id int) (entity.
 	`
 
 	var item entity.Item
-	if err := ir.database.QueryRowxContext(ctx, q, id).Scan(&item.ID, &item.OwnerID, &item.Name, &item.Price); err != nil {
+	rows, err := ir.database.QueryxContext(ctx, q, id)
+	if err != nil {
 		ir.log.Error("failed to execute request to db", slog.String("error", err.Error()))
+		return entity.Item{}, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		if err := rows.Scan(&item.ID, &item.OwnerID, &item.Name, &item.Price); err != nil {
+			ir.log.Error("failed to scan select", slog.String("error", err.Error()))
+			return entity.Item{}, err
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		ir.log.Error("error after for", slog.String("error", err.Error()))
 		return entity.Item{}, err
 	}
 
@@ -112,9 +126,23 @@ func (ir *pgItemRepository) UpdateItem(ctx context.Context, item entity.Item) (e
 	RETURNING id, owner_id, name, price
 	`
 
-	var updateItem entity.Item
-	if err := ir.database.QueryRowxContext(ctx, q, item.OwnerID, item.Name, item.Price, item.ID).Scan(&updateItem.ID, &updateItem.OwnerID, &updateItem.Name, &updateItem.Price); err != nil {
+	rows, err := ir.database.QueryxContext(ctx, q, item.OwnerID, item.Name, item.Price, item.ID)
+	if err != nil {
 		ir.log.Error("failed to execute request to db", slog.String("error", err.Error()))
+		return entity.Item{}, err
+	}
+	defer rows.Close()
+
+	var updateItem entity.Item
+	for rows.Next() {
+		if err := rows.Scan(&updateItem.ID, &updateItem.OwnerID, &updateItem.Name, &updateItem.Price); err != nil {
+			ir.log.Error("failed to scan update", slog.String("error", err.Error()))
+			return entity.Item{}, err
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		ir.log.Error("error after for", slog.String("error", err.Error()))
 		return entity.Item{}, err
 	}
 

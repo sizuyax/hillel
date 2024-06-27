@@ -7,15 +7,18 @@ import (
 )
 
 func SetupRoutes(cfg handlers.Config, handler handlers.Handler) {
-	itemGroupWithToken := cfg.EchoRouter.Group("/items", middlewares.ParseAccessSellerToken(cfg.TokenService))
-	itemGroupWithToken.POST("", handler.CreateItem)
-	itemGroupWithToken.PUT("/:id", handler.UpdateItem)
-	itemGroupWithToken.DELETE("/:id", handler.DeleteItemByID)
+	itemGroupForSeller := cfg.EchoRouter.Group("/items", middlewares.ParseAccessSellerToken(cfg.TokenService))
+	itemGroupForSeller.POST("", handler.CreateItem)
+	itemGroupForSeller.PUT("/:id", handler.UpdateItem)
+	itemGroupForSeller.DELETE("/:id", handler.DeleteItemByID)
 
-	itemGroup := cfg.EchoRouter.Group("/items")
-	itemGroup.GET("", handler.GetItems)
-	itemGroup.GET("/:id", handler.GetItemByID)
-	itemGroup.POST("/:id/comments", handler.CreateComment, middlewares.ParseAccessToken(cfg.TokenService))
+	itemGroupForUser := cfg.EchoRouter.Group("/items")
+	itemGroupForUser.GET("", handler.GetItems)
+	itemGroupForUser.GET("/:id", handler.GetItemByID)
+	itemGroupForUser.POST("/:id/comments", handler.CreateComment, middlewares.ParseAccessUserToken(cfg.TokenService))
+	itemGroupForUser.POST("/:id/bids", handler.CreateBid, middlewares.ParseAccessUserToken(cfg.TokenService))
+
+	cfg.EchoRouter.GET("/ws/:id", handler.WebSocket)
 
 	sellerGroup := cfg.EchoRouter.Group("/sellers")
 	sellerGroup.POST("", handler.RegisterSeller)

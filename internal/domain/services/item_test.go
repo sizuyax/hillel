@@ -134,22 +134,10 @@ func TestUpdateItem(t *testing.T) {
 		updateItem, err := svc.UpdateItem(ctx, tc.InputItem)
 
 		if assert.NoError(t, err) {
-<<<<<<< HEAD
-			assert.Equal(t, tc.ExpectedItem, updateItem)
-			assert.Equal(t, inputItem.Name, updateItem.Name)
-		}
-
-		mockRepo.AssertExpectations(t)
-
-		fmt.Println(updateItem, "---> error: ", err)
-	}
-
-=======
 			assert.Equal(t, tc.ExpectedError, err)
 			assert.Equal(t, tc.ExpectedItem, updateItem)
 			assert.Equal(t, inputItem.Name, updateItem.Name)
 		}
 		mockRepo.AssertExpectations(t)
 	}
->>>>>>> 738e5b1 (fixed problems)
 }

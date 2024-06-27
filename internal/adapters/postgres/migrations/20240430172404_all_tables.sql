@@ -1,18 +1,6 @@
 -- +goose Up
--- CREATE TABLE users (
---     id SERIAL PRIMARY KEY,
---     email VARCHAR(50) UNIQUE,
---     password VARCHAR(256)
--- );
-
--- CREATE TABLE sellers(
---     id SERIAL PRIMARY KEY ,
---     email VARCHAR(50) UNIQUE,
---     password VARCHAR(256)
--- );
-
 CREATE TABLE profiles (
-    id SERIAL PRIMARY KEY ,
+    id SERIAL PRIMARY KEY,
     email VARCHAR(50) UNIQUE,
     password VARCHAR(256),
     type VARCHAR(20)
@@ -30,7 +18,7 @@ CREATE TABLE items (
 );
 
 CREATE TABLE comments (
-    id SERIAL PRIMARY KEY ,
+    id SERIAL PRIMARY KEY,
     item_id BIGINT,
     owner_id BIGINT,
     body TEXT UNIQUE,
@@ -38,15 +26,35 @@ CREATE TABLE comments (
     CONSTRAINT fk_item_id
         FOREIGN KEY (item_id)
             REFERENCES items(id)
-                      ON DELETE CASCADE,
+            ON DELETE CASCADE,
 
     CONSTRAINT fk_owner_id
         FOREIGN KEY (owner_id)
             REFERENCES profiles(id)
-                      ON DELETE CASCADE
+            ON DELETE CASCADE
+);
+
+CREATE TABLE bids (
+    id SERIAL PRIMARY KEY,
+    item_id BIGINT,
+    owner_id BIGINT,
+    points FLOAT,
+
+    CONSTRAINT fk_item_id
+        FOREIGN KEY (item_id)
+            REFERENCES items(id)
+                ON DELETE CASCADE,
+
+    CONSTRAINT fk_owner_id
+        FOREIGN KEY (owner_id)
+            REFERENCES profiles(id)
+                ON DELETE CASCADE,
+
+    CONSTRAINT item_points_unique UNIQUE (item_id, points)
 );
 
 -- +goose Down
+DROP TABLE bids;
 DROP TABLE comments;
 DROP TABLE items;
 DROP TABLE profiles;

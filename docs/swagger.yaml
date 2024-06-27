@@ -30,6 +30,11 @@ definitions:
     - Internal
     - NoRows
     - Unprocessable
+  dto.CreateBidRequest:
+    properties:
+      points:
+        type: number
+    type: object
   dto.CreateCommentRequest:
     properties:
       body:
@@ -68,6 +73,17 @@ definitions:
       name:
         type: string
       price:
+        type: number
+    type: object
+  entity.Bid:
+    properties:
+      id:
+        type: integer
+      item_id:
+        type: integer
+      owner_id:
+        type: integer
+      points:
         type: number
     type: object
   entity.Comment:
@@ -288,6 +304,43 @@ paths:
       summary: Update item
       tags:
       - Items
+  /items/{id}/bids:
+    post:
+      consumes:
+      - application/json
+      description: Create bid for item
+      parameters:
+      - description: item id for bid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: model for create bid
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateBidRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Bid'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Create bid for item
+      tags:
+      - Bids
   /items/{id}/comments:
     post:
       consumes:

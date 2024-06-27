@@ -33,7 +33,7 @@ func NewTokenService(log *slog.Logger, accessSignedString, refreshSignedString s
 func (ts tokenService) GenerateJWTAccessToken(profileID int, profileType string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &entity.AccessJWTClaims{
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(10 * time.Minute).UTC().Unix(),
+			ExpiresAt: time.Now().Add(10 * time.Hour).UTC().Unix(),
 		},
 		ProfileID:   profileID,
 		ProfileType: profileType,
@@ -47,20 +47,20 @@ func (ts tokenService) ParseJWTAccessToken(accessToken string) (int, string, err
 
 	token, err := jwt.ParseWithClaims(accessToken, &entity.AccessJWTClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			ts.log.With(op).Error("unexpected signing method")
+			ts.log.Error("unexpected signing method", slog.String("op", op))
 			return nil, fmt.Errorf("%s: unexpected signing method: %v", op, token.Header["alg"])
 		}
 
 		return []byte(ts.accessSignedString), nil
 	})
 	if err != nil {
-		ts.log.With(op).Error("failed to parse access token", slog.String("error", err.Error()))
+		ts.log.Error("failed to parse access token", slog.String("error", err.Error()), slog.String("op", op))
 		return 0, "", fmt.Errorf("%s:%v", op, err)
 	}
 
 	claims, ok := token.Claims.(*entity.AccessJWTClaims)
 	if !ok {
-		ts.log.With(op).Error("failed to get claims")
+		ts.log.Error("failed to get claims", slog.String("op", op))
 		return 0, "", fmt.Errorf("%s: failed to parse claims: %v", op, err)
 	}
 
@@ -84,20 +84,20 @@ func (ts tokenService) RefreshAccessJWTToken(refreshToken string) (*entity.PairJ
 
 	token, err := jwt.ParseWithClaims(refreshToken, &entity.AccessJWTClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			ts.log.With(op).Error("unexpected signing method")
+			ts.log.Error("unexpected signing method", slog.String("op", op))
 			return nil, fmt.Errorf("%s: unexpected signing method: %v", op, token.Header["alg"])
 		}
 
 		return []byte(ts.refreshSignedString), nil
 	})
 	if err != nil {
-		ts.log.With(op).Error("failed to parse refresh token", slog.String("error", err.Error()))
+		ts.log.Error("failed to parse refresh token", slog.String("error", err.Error()), slog.String("op", op))
 		return nil, fmt.Errorf("%s:%v", op, err)
 	}
 
 	claims, ok := token.Claims.(*entity.AccessJWTClaims)
 	if !ok {
-		ts.log.With(op).Error("failed to get claims")
+		ts.log.Error("failed to get claims", slog.String("op", op))
 		return nil, fmt.Errorf("%s: failed to parse claims: %v", op, err)
 	}
 

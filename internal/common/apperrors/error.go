@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 type ErrorType string
@@ -53,18 +54,20 @@ func Status(err error) int {
 	return http.StatusInternalServerError
 }
 
-func NewBadRequest(reason string) *Error {
+func NewBadRequest(reason interface{}) *Error {
 	return &Error{
 		Type:    BadRequest,
 		Message: fmt.Sprintf("Bad request. Reason: %v", reason),
 	}
 }
 
-func NewConflict(name string, value string) *Error {
+func NewConflict(name interface{}, values ...string) *Error {
+	valuesStr := strings.Join(values, ", ")
 	return &Error{
 		Type:    Conflict,
-		Message: fmt.Sprintf("resource: %v with value: %v already exists", name, value),
+		Message: fmt.Sprintf("resource: %v with values: [%v] already exists", name, valuesStr),
 	}
+
 }
 
 func NewInternal() *Error {

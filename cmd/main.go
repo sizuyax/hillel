@@ -65,7 +65,7 @@ func gracefulShutdown(srv *http.Server, log *slog.Logger) {
 
 	log.Info("received signal to shut down the server")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
